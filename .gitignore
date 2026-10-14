@@ -67,6 +67,7 @@ db/real-matches-cache.json
 /download
 /agent-ctx
 /--full-page
+/screenshots
 
 # PID-файл запущенных процессов
 .zscripts/dev.pid
