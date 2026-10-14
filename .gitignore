@@ -1,0 +1,76 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+local-*
+.claude
+.z-ai-config
+*.log
+dev.log
+dev.out.log
+test
+prompt
+
+server.log
+# Skills directory
+/skills
+db/real-matches-cache.json
+
+# === Резервное копирование в GitHub (репозиторий публичный!) ===
+# База данных SQLite содержит секреты (токен Telegram-бота) — НЕ пушим в GitHub.
+# Для восстановления на новом сервере: bun run db:push + авто-сидинг данными.
+/db/*.db
+/db/*.db-journal
+
+# Состояние telegram-бота (содержит токен бота)
+/mini-services/*/data
+
+# Локальные артефакты агентов (скриншоты QA, рабочие заметки)
+/download
+/agent-ctx
+/--full-page
+
+# PID-файл запущенных процессов
+.zscripts/dev.pid
+
+# Внутренние журналы агентов и выводы команд (могут содержать секреты)
+/tool-results
+/worklog.md

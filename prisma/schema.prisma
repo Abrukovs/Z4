@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Tipster {
+  id        String    @id @default(cuid())
+  name      String
+  role      String // e.g. "Главный аналитик", "Эксперт по теннису"
+  /** Специализация по виду спорта (null — универсальный аналитик) */
+  sport     String? // "football" | "tennis" | "hockey" | "basketball"
+  avatarUrl String?
+  wins      Int       @default(0)
+  losses    Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  bets      Bet[]
+  articles  Article[]
+}
+
+model Subscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String   @default("site") // e.g. "site" | "footer"
+  createdAt DateTime @default(now())
+}
+
+model Bet {
+  id          String   @id @default(cuid())
+  sport       String // "football" | "tennis" | "hockey" | "basketball"
+  league      String // e.g. "Ла Лига", "АПЛ", "ATP Мадрид", "КХЛ", "НБА"
+  homeTeam    String
+  awayTeam    String
+  matchDate   DateTime // kickoff/match start
+  market      String // e.g. "Исход матча (1X2)", "Тотал голов"
+  selection   String // e.g. "П1 — Победа хозяев", "ТБ 2.5"
+  odds        Float // decimal odds, 1.30–3.50
+  stake       Float // units 1–10
+  confidence  Int // 0–100
+  analysis    String // detailed analysis in Russian
+  status      String // "pending" | "won" | "lost" | "void"
+  resultNote  String? // post-match comment
+  /** true — прогноз построен на матче из РЕАЛЬНОГО расписания (Спорт-Экспресс) */
+  isRealMatch Boolean @default(false)
+  isBetOfDay  Boolean @default(false)
+
+  /** Подробный разбор логики «звезды» (JSON: тезис, факторы, сценарий, риски,
+   *  альтернатива, обоснование ставки) — Task 37 */
+  starLogic   String?
+
+  /* Линия рынка (web-search): найденный кэф на наш выбор для сравнения ценности */
+  marketOdds      Float?
+  /** Домен источника линии, напр. «bookmaker-ratings.ru» */
+  marketSource    String?
+  /** Вердикт сравнения: «наш кэф выше рынка...» */
+  marketNote      String?
+  marketCheckedAt DateTime?
+  tipsterId   String?
+  tipster     Tipster? @relation(fields: [tipsterId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/** Настройки дайджеста в Telegram (singleton, id = "main").
+ *  ОДНО сообщение в сутки — утром (sendHour): итог вчерашнего дня
+ *  и полный разбор зашедших главных ставок (Task 50, по просьбе владельца
+ *  «разбор нужен только 1 — утром, а вечером не надо»). */
+model DigestSettings {
+  id               String   @id @default("main")
+  /** Автоотправка включена (токен + чат обязательны) */
+  telegramEnabled  Boolean  @default(false)
+  /** Токен бота от @BotFather (хранится на сервере, наружу не отдаётся) */
+  telegramBotToken String?
+  /** Chat id, куда слать разбор (личный чат или группа) */
+  telegramChatId   String?
+  /** Человекочитаемое имя чата (для отображения в UI) */
+  telegramChatTitle String?
+  /** Час отправки утреннего разбора по МСК (7–12) */
+  sendHour         Int      @default(9)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+/** Журнал отправок утреннего разбора (защита от дублей + история в UI) */
+model DigestLog {
+  id         String   @id @default(cuid())
+  /** Дата РАЗБОРА (вчерашний день, YYYY-MM-DD по МСК) */
+  digestDate String
+  /** Канал/режим: "telegram" (авто) | "telegram-manual" (кнопка) | "telegram-test" */
+  channel    String
+  success    Boolean
+  error      String?
+  /** Отправленный текст (HTML Telegram) — предпросмотр в UI */
+  message    String
+  createdAt  DateTime @default(now())
+}
+
+/** Редакционные материалы: разборы, итоги дня, взгляд на завтра */
+model Article {
+  id          String   @id @default(cuid())
+  slug        String   @unique // e.g. "razbor-04-09-2026-portu-moreirensi"
+  title       String
+  /** Краткий лид для карточки (1–2 предложения) */
+  excerpt     String
+  /** Полный текст: абзацы разделены \n\n */
+  content     String
+  category    String // "Разбор матча" | "Итоги дня" | "Взгляд на завтра"
+  sport       String // "football" | "tennis" | "hockey" | "basketball"
+  /** Связка с матчем: «Порту — Морейренси» (для навигации в ленте) */
+  matchRef    String?
+  readMinutes Int      @default(4)
+  /** Сигнатура данных («Итоги дня»: W-L-V-N) — при изменении контент обновляется */
+  contentSig  String?
+  authorId    String?
+  author      Tipster? @relation(fields: [authorId], references: [id])
+  publishedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
