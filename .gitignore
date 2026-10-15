@@ -75,3 +75,4 @@ db/real-matches-cache.json
 # Внутренние журналы агентов и выводы команд (могут содержать секреты)
 /tool-results
 /worklog.md
+/backups

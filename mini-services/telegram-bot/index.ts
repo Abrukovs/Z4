@@ -339,6 +339,11 @@ async function pollLoop() {
     const token = settings.token
     if (!token) {
       stats.polling = false
+      // Багфикс: если токена нет, цикл раньше «засыпал» навсегда, не перечитывая
+      // настройки из БД (бот оставался мёртвым, даже когда пользователь всё
+      // настроил). Теперь каждые 20с перечитываем DigestSettings — сервис
+      // сам оживает, как только в БД появляется токен.
+      settings = readSettings()
       await sleep(SETTINGS_REFRESH_MS)
       continue
     }
