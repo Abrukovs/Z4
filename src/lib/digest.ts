@@ -3,6 +3,8 @@ import { betOutcome, scoreOf } from '@/lib/format'
 import { EXPRESS_STAKE } from '@/lib/express-history'
 import { parseStarLogic } from '@/lib/star-logic'
 import { resolveRealBets } from '@/lib/real-bets'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import type { Bet, DigestSettings } from '@prisma/client'
 
 /**
@@ -723,12 +725,50 @@ interface SettingsPatch {
   sendHour?: number
 }
 
+/**
+ * Самовосстановление настроек после ночного сброса окружения (Task 53).
+ *
+ * Платформа периодически сбрасывает рабочую копию: gitignored-файлы
+ * (включая db/custom.db) удаляются, и настройки бота пропадают. Но папка
+ * .git выживает всегда, поэтому резерв настроек лежит в
+ * .git/local-backup/bot-settings.json (обновляется backup-db.sh; в
+ * репозиторий никогда не попадает — git не коммитит содержимое .git).
+ * Здесь — восстановление: если в БД токена нет, а в резерве есть,
+ * возвращаем ровно прежние настройки владельца.
+ */
+function restoreSettingsFromStash(s: DigestSettings): DigestSettings | null {
+  if (s.telegramBotToken) return null // настройки на месте — восстанавливать нечего
+  try {
+    const stashPath = join(process.cwd(), '.git', 'local-backup', 'bot-settings.json')
+    const stash = JSON.parse(readFileSync(stashPath, 'utf8')) as Partial<DigestSettings>
+    if (!stash.telegramBotToken || !BOT_TOKEN_RE.test(stash.telegramBotToken)) return null
+    console.log('[digest] Настройки бота были стёрты сбросом окружения — восстанавливаю из .git/local-backup/')
+    return stash as DigestSettings
+  } catch {
+    return null // резерва нет (владелец ещё не настраивал бота) — штатно
+  }
+}
+
 export async function getDigestSettings(): Promise<DigestSettings> {
   const row = await db.digestSettings.findUnique({ where: { id: DIGEST_SETTINGS_ID } })
-  if (row) return row
-  return db.digestSettings.create({
+  const current = row ?? (await db.digestSettings.create({
     data: { id: DIGEST_SETTINGS_ID, sendHour: 9 },
-  })
+  }))
+
+  const stash = restoreSettingsFromStash(current)
+  if (stash) {
+    return db.digestSettings.update({
+      where: { id: DIGEST_SETTINGS_ID },
+      data: {
+        telegramBotToken: stash.telegramBotToken,
+        telegramChatId: stash.telegramChatId,
+        telegramChatTitle: stash.telegramChatTitle,
+        sendHour: stash.sendHour,
+        telegramEnabled: stash.telegramEnabled,
+      },
+    })
+  }
+  return current
 }
 
 export function publicSettings(s: DigestSettings): PublicDigestSettings {
