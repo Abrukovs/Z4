@@ -76,3 +76,4 @@ db/real-matches-cache.json
 /tool-results
 /worklog.md
 /backups
+.zscripts/.git-push-stamp

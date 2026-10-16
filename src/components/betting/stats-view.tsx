@@ -44,6 +44,7 @@ import {
 } from '@/components/ui/select'
 import { StatusBadge } from '@/components/betting/status-badge'
 import { BetDetailsDialog } from '@/components/betting/bet-details-dialog'
+import { GitHubBackupCard } from '@/components/betting/github-backup-card'
 import { OverallSummary } from '@/components/betting/overall-summary'
 import { sportLabel, SPORT_COLORS, SPORT_LIST } from '@/lib/sports'
 import type { BetDto, StatsFilterState, StatsResponse } from '@/lib/types'
@@ -691,6 +692,10 @@ export function StatsView({
           </div>
         </ChartCard>
       )}
+
+      {/* Резервная копия: владелец может вручную отправить код в GitHub
+          (авто-пуш срабатывает раз в сутки) */}
+      <GitHubBackupCard />
 
       {/* Диалог разбора прогноза: анализ, счёт, итог в юнитах */}
       <BetDetailsDialog bet={selected} onOpenChange={(o) => !o && setSelected(null)} />
