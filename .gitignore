@@ -74,6 +74,9 @@ db/real-matches-cache.json
 
 # Внутренние журналы агентов и выводы команд (могут содержать секреты)
 /tool-results
-/worklog.md
+
+# NOTE: worklog.md СОЗНАТЕЛЬНО отслеживается в git (убран из ignore):
+# ночные сбросы окружения удаляют gitignored-файлы, а журнал работ —
+# единственная память проекта. Секреты в него не записывать!
 /backups
 .zscripts/.git-push-stamp

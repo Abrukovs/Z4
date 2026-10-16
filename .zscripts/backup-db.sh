@@ -51,3 +51,28 @@ fi
 ls -1t "$BACKUP_DIR"/db-*.db 2>/dev/null | tail -n +$((KEEP + 1)) | while read -r old; do
   rm -f "$old" && echo "[backup] Удалена старая копия: $old"
 done
+
+# === Страховка от ночного сброса окружения ===
+# Платформа регулярно удаляет gitignored-файлы (включая backups/), но .git
+# выживает всегда. Дублируем последнюю копию БД и настройки бота
+# в .git/local-backup/ — эта папка никогда не пушится в GitHub
+# (содержимое .git не входит в коммиты) и не удаляется сбросами.
+STASH="$PROJECT_DIR/.git/local-backup"
+mkdir -p "$STASH"
+LATEST="$(ls -1t "$BACKUP_DIR"/db-*.db 2>/dev/null | head -1 || true)"
+if [ -n "$LATEST" ]; then
+  cp -f "$LATEST" "$STASH/db-latest.db" && echo "[backup] Страховочная копия: $STASH/db-latest.db"
+fi
+if [ -f "$PROJECT_DIR/db/custom.db" ]; then
+  bun -e "
+import {PrismaClient} from '@prisma/client';
+import { writeFileSync } from 'node:fs';
+const p = new PrismaClient();
+const s = await p.digestSettings.findFirst();
+if (s && s.telegramBotToken) {
+  writeFileSync('$STASH/bot-settings.json', JSON.stringify({ telegramBotToken: s.telegramBotToken, telegramChatId: s.telegramChatId, telegramChatTitle: s.telegramChatTitle, sendHour: s.sendHour, telegramEnabled: s.telegramEnabled }, null, 2));
+  console.log('[backup] Настройки бота продублированы в .git/local-backup/');
+}
+process.exit(0);
+" 2>/dev/null || true
+fi

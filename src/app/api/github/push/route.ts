@@ -13,14 +13,6 @@ const COOLDOWN_MS = 20_000
 
 export async function POST() {
   try {
-    // Коммиты, ждущие отправки (до пуша)
-    const before = await exec('git', ['rev-list', '--count', 'origin/main..main'], {
-      cwd: PROJECT_DIR,
-      timeout: 15_000,
-    })
-      .then(({ stdout }) => Number(stdout.trim()) || 0)
-      .catch(() => 0)
-
     const now = Date.now()
     if (now - lastCallAt < COOLDOWN_MS) {
       return NextResponse.json(
@@ -35,6 +27,14 @@ export async function POST() {
     }
     lastCallAt = now
 
+    // Позиция удалённого репозитория ДО пуша (по ней посчитаем, сколько реально ушло)
+    const remoteBefore = await exec('git', ['rev-parse', 'origin/main'], {
+      cwd: PROJECT_DIR,
+      timeout: 15_000,
+    })
+      .then(({ stdout }) => stdout.trim())
+      .catch(() => '')
+
     // Ручной режим: коммит + немедленный пуш (троттлинг «раз в день» обходим)
     const { stdout, stderr } = await exec(
       'bash',
@@ -42,7 +42,17 @@ export async function POST() {
       { cwd: PROJECT_DIR, timeout: 120_000, maxBuffer: 1024 * 1024 },
     )
 
-    // Сколько реально ушло
+    // Сколько коммитов ушло: от старой позиции remote до текущего main
+    const pushed = remoteBefore
+      ? await exec('git', ['rev-list', '--count', `${remoteBefore}..main`], {
+          cwd: PROJECT_DIR,
+          timeout: 15_000,
+        })
+          .then(({ stdout }) => Number(stdout.trim()) || 0)
+          .catch(() => 0)
+      : 1
+
+    // Коммиты, всё ещё ждущие отправки (на случай сбоя пуша)
     const after = await exec('git', ['rev-list', '--count', 'origin/main..main'], {
       cwd: PROJECT_DIR,
       timeout: 15_000,
@@ -50,7 +60,6 @@ export async function POST() {
       .then(({ stdout }) => Number(stdout.trim()) || 0)
       .catch(() => 0)
 
-    const pushed = Math.max(0, before - after)
     const nothingToPush = /Изменений нет/.test(stdout)
 
     return NextResponse.json({
