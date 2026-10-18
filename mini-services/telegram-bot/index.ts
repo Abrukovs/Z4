@@ -33,6 +33,26 @@ const STALE_AFTER_MS = 5 * 60 * 1000
 /** Как часто перечитывать настройки из БД (смена часа, вкл/выкл, токен) */
 const SETTINGS_REFRESH_MS = 20_000
 
+/* ---- Журнал ошибок основного сайта (Task 54) ----
+ * Сбои бота уходят в общий журнал ошибок сайта (вкладка «Статистика»),
+ * чтобы владелец видел их в одном месте. Отправка fire-and-forget:
+ * журнал не должен мешать работе бота. */
+async function reportError(message: string, context?: Record<string, unknown>): Promise<void> {
+  try {
+    await fetch(`${MAIN_APP}/api/errors`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ level: 'error', scope: 'telegram-bot', message, context }),
+      signal: AbortSignal.timeout(5_000),
+    })
+  } catch {
+    /* сайт недоступен — журнал подождёт */
+  }
+}
+function reportErrorBg(message: string, context?: Record<string, unknown>): void {
+  void reportError(message, context)
+}
+
 /* --------------------------- Настройки ---------------------------- */
 
 interface BotSettings {
@@ -82,6 +102,9 @@ function readSettings(): BotSettings {
   } catch (e) {
     // БД может быть на мгновение занята сайтом — просто оставим прежние
     console.error('[settings] read error:', (e as Error).message)
+    reportErrorBg('Бот не смог прочитать настройки из базы сайта', {
+      error: (e as Error).message,
+    })
     return settings
   }
 }
@@ -226,6 +249,11 @@ async function ingest(
     return { ok: res.ok && !!data?.ok }
   } catch (e) {
     console.error('[ingest] error:', (e as Error).message)
+    reportErrorBg('Бот не смог передать подключение чата на сайт', {
+      action,
+      chatId,
+      error: (e as Error).message,
+    })
     return { ok: false }
   }
 }
@@ -249,7 +277,13 @@ async function handleMessage(m: TgMessage, dry = false): Promise<DryResult | nul
       parse_mode: 'HTML',
       disable_web_page_preview: true,
     })
-    if (!r.ok) console.error('[send] failed:', r.error)
+    if (!r.ok) {
+      console.error('[send] failed:', r.error)
+      reportErrorBg('Бот не смог отправить сообщение в Telegram', {
+        chatId: m.chat.id,
+        error: r.error,
+      })
+    }
     return r.ok
   }
   const act = async (action: 'connect' | 'enable' | 'disable') => {
@@ -360,6 +394,16 @@ async function pollLoop() {
     if (!r.ok) {
       stats.lastError = r.error
       console.error('[poll] error:', r.error, r.code ?? '')
+      // Понятная формулировка для владельца: 401 Unauthorized = токен отозван
+      const unauthorized = /unauthorized/i.test(r.error ?? '')
+      reportErrorBg(
+        unauthorized
+          ? 'Токен бота отклонён Telegram (Unauthorized): токен отозван или неверен. Нужен новый токен от @BotFather — вставьте его в настройках Telegram-раздела на сайте'
+          : r.code === 'webhook-active'
+            ? 'Опрос бота заблокирован: к боту подключён вебхук стороннего сервиса'
+            : 'Опрос Telegram не удался (сеть или лимиты)',
+        { error: r.error, code: r.code },
+      )
       await sleep(r.code === 'webhook-active' ? 60_000 : 5_000)
       settings = readSettings()
       continue
@@ -382,6 +426,11 @@ async function pollLoop() {
         stats.handled++
       } catch (e) {
         console.error('[handle] error:', e)
+        reportErrorBg('Сбой при обработке сообщения в боте', {
+          chatId: m.chat.id,
+          text: m.text.slice(0, 80),
+          error: e instanceof Error ? e.message : String(e),
+        })
       }
     }
     // периодически подхватываем изменения настроек (час, вкл/выкл, токен)
@@ -456,6 +505,7 @@ if (settings.token) {
         console.log(`[bot] connected as @${botInfo.username}`)
       } else {
         console.error('[bot] getMe failed:', r.error)
+        reportErrorBg('Бот не смог подключиться к Telegram (getMe)', { error: r.error })
       }
     })
     .catch(() => {})

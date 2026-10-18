@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { logErrorBg } from '@/lib/error-log'
 import {
   autoDetectChat,
   buildDigest,
@@ -63,6 +64,7 @@ export async function GET() {
     })
   } catch (error) {
     console.error('GET /api/digest error:', error)
+    logErrorBg('api', 'Не удалось собрать данные Telegram-рассылки', error)
     return NextResponse.json({ error: 'Не удалось собрать данные рассылки' }, { status: 500 })
   }
 }

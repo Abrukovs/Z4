@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { logErrorBg } from '@/lib/error-log'
 import {
   getDigestSettings,
   publicSettings,
@@ -53,6 +54,7 @@ export async function PUT(request: Request) {
     return NextResponse.json({ settings: publicSettings(saved) })
   } catch (error) {
     console.error('PUT /api/digest/settings error:', error)
+    logErrorBg('api', 'Не удалось сохранить настройки Telegram-рассылки', error)
     return NextResponse.json({ error: 'Не удалось сохранить настройки' }, { status: 500 })
   }
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { logErrorBg } from '@/lib/error-log'
 import { ensureFreshData, maintenanceTick } from '@/lib/seed'
 import { collectLiveInfo } from '@/lib/real-bets'
 import { isSportKey } from '@/lib/types'
@@ -76,6 +77,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ bets, total, page, pageSize, totalPages })
   } catch (error) {
     console.error('GET /api/bets error:', error)
+    logErrorBg('api', 'Не удалось загрузить ленту прогнозов', error)
     return NextResponse.json({ error: 'Не удалось загрузить прогнозы' }, { status: 500 })
   }
 }

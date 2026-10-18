@@ -1,6 +1,7 @@
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { NextResponse } from 'next/server'
+import { logErrorBg } from '@/lib/error-log'
 
 export const dynamic = 'force-dynamic'
 
@@ -75,6 +76,7 @@ export async function POST() {
     })
   } catch (error) {
     console.error('POST /api/github/push error:', error)
+    logErrorBg('api', 'Не удалось отправить изменения в GitHub (кнопка «Сохранить на GitHub»)', error)
     return NextResponse.json(
       {
         ok: false,

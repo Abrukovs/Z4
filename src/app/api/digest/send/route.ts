@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { logErrorBg } from '@/lib/error-log'
 import { sendDailyDigest } from '@/lib/digest'
 
 export const dynamic = 'force-dynamic'
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ...outcome, kind: 'morning' })
   } catch (error) {
     console.error('POST /api/digest/send error:', error)
+    logErrorBg('api', 'Сбой при отправке разбора в Telegram', error)
     return NextResponse.json(
       { sent: false, reason: 'error', error: 'Сбой сервера при отправке' },
       { status: 500 },

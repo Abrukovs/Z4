@@ -99,6 +99,27 @@ model DigestLog {
   createdAt  DateTime @default(now())
 }
 
+/** Журнал ошибок и предупреждений сайта — виден владельцу на вкладке
+ *  «Статистика» (Task 54: «Ошибки пишете в Журнал ошибок?» — раньше ошибки
+ *  уходили только в консоль сервера, которую владелец не видит). */
+model ErrorLog {
+  id          String   @id @default(cuid())
+  /** Уровень важности: "error" (сбой) | "warn" (деградация) | "info" (событие) */
+  level       String
+  /** Модуль-источник: "real-bets" | "digest" | "telegram-bot" | "api" | … */
+  scope       String
+  /** Краткое сообщение на русском для владельца */
+  message     String
+  /** Детали (JSON-строка: стек, счётчики, причина) — раскрывается в UI */
+  context     String?
+  /** Сколько раз повторилось: одинаковые записи за 10 минут схлопываются */
+  count       Int      @default(1)
+  firstSeenAt DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+
+  @@index([lastSeenAt])
+}
+
 /** Редакционные материалы: разборы, итоги дня, взгляд на завтра */
 model Article {
   id          String   @id @default(cuid())

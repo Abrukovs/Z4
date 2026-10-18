@@ -299,6 +299,7 @@ export async function GET(req: NextRequest) {
     })
   } catch (error) {
     console.error('GET /api/stats error:', error)
+    logErrorBg('api', 'Не удалось загрузить статистику', error)
     return NextResponse.json({ error: 'Не удалось загрузить статистику' }, { status: 500 })
   }
 }

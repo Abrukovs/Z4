@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { logErrorBg } from '@/lib/error-log'
 import { ensureFreshData, maintenanceTick } from '@/lib/seed'
 import { collectLiveInfo } from '@/lib/real-bets'
 
@@ -165,6 +166,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ tipsters: result })
   } catch (error) {
     console.error('GET /api/tipsters error:', error)
+    logErrorBg('api', 'Не удалось загрузить список аналитиков', error)
     return NextResponse.json({ error: 'Не удалось загрузить аналитиков' }, { status: 500 })
   }
 }

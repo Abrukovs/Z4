@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { logErrorBg } from '@/lib/error-log'
 import { ensureFreshData, maintenanceTick } from '@/lib/seed'
 import { collectLiveInfo } from '@/lib/real-bets'
 import { computeExpressDays, finishedExpressDays } from '@/lib/express-history'
@@ -106,6 +107,7 @@ export async function GET() {
     })
   } catch (error) {
     console.error('GET /api/express error:', error)
+    logErrorBg('api', 'Не удалось собрать «Экспресс дня»', error)
     return NextResponse.json({ error: 'Не удалось собрать экспресс дня' }, { status: 500 })
   }
 }

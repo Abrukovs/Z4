@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { logErrorBg } from '@/lib/error-log'
 import { ensureFreshData, maintenanceTick } from '@/lib/seed'
 import { collectLiveInfo, rotateBetOfDay } from '@/lib/real-bets'
 import { refreshMarketIntel } from '@/lib/odds-intel'
@@ -56,6 +57,7 @@ export async function GET() {
     return NextResponse.json({ bet: bet ? { ...bet, liveInfo } : null })
   } catch (error) {
     console.error('GET /api/bet-of-day error:', error)
+    logErrorBg('api', 'Не удалось загрузить «Ставку дня»', error)
     return NextResponse.json({ error: 'Не удалось загрузить ставку дня' }, { status: 500 })
   }
 }

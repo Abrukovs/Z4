@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { logErrorBg } from '@/lib/error-log'
 import {
   getDigestSettings,
   saveDigestSettings,
@@ -94,6 +95,7 @@ export async function POST(req: Request) {
     })
   } catch (error) {
     console.error('POST /api/digest/telegram-ingest error:', error)
+    logErrorBg('api', 'Сбой обработки входящего сообщения бота', error)
     return NextResponse.json({ ok: false, error: 'internal' }, { status: 500 })
   }
 }

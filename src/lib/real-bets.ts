@@ -1,4 +1,5 @@
 import { db } from '@/lib/db'
+import { logErrorBg, logWarnBg } from '@/lib/error-log'
 import type ZAI from 'z-ai-web-dev-sdk'
 import {
   getRealMatches,
@@ -458,6 +459,12 @@ async function llmPredictions(matches: SelectedMatch[]): Promise<Map<number, Llm
     return parseLlmJson(text, matches.length)
   } catch (e) {
     console.error('[real-bets] LLM generation failed:', e)
+    logErrorBg(
+      'real-bets',
+      'Нейросеть для прогнозов недоступна — прогнозы собраны по упрощённой эвристике',
+      e,
+      { matches: matches.length },
+    )
     return new Map()
   }
 }
@@ -900,8 +907,30 @@ async function applyStarPolicy(
     if (star && !selected.some((s) => s.sport === 'tennis')) {
       return [...selected, star]
     }
+    // Журнал для владельца: звезда осталась без прогноза — объясняем ПОЧЕМУ
+    // (Task 54: «не загрузилась ставка от Марии» — причина была невидима)
+    if (!star) {
+      const all = data.sports.tennis ?? []
+      const valid = all.filter(
+        (m) => m.status === 'upcoming' && m.time !== '00:00' && !m.home.includes('/') && !m.away.includes('/'),
+      )
+      logWarnBg('real-bets', `«Звезда» (теннис) без прогноза дня: в сетке ${data.date} нет подходящих матчей`, {
+        day: data.date,
+        totalTennis: all.length,
+        finished: all.filter((m) => m.status === 'finished').length,
+        live: all.filter((m) => m.status === 'live').length,
+        upcomingValid: valid.length,
+        note:
+          valid.length === 0
+            ? 'Предстоящие теннисные матчи отсутствуют: сетка дня уже сыграна либо ещё не опубликована источником. Прогноз появится автоматически, когда расписание опубликуют.'
+            : 'Подходящие матчи отсеяны фильтрами (время старта уже прошло).',
+      })
+    }
   } catch (e) {
     console.error('[real-bets] applyStarPolicy error:', e)
+    logErrorBg('real-bets', 'Не удалось применить политику «звезды» (теннисный прогноз дня)', e, {
+      day: data.date,
+    })
   }
   return selected
 }
@@ -1513,6 +1542,7 @@ async function maybeGenerate(): Promise<void> {
     await inflight
   } catch (e) {
     console.error('[real-bets] generation error:', e)
+    logErrorBg('real-bets', 'Фоновая генерация прогнозов не удалась', e)
   } finally {
     setGenInflight(null)
   }
@@ -1523,12 +1553,24 @@ async function maybeGenerate(): Promise<void> {
  * НЕ в ожидании: расчёт по счётам + фоновая генерация при нехватке прогнозов.
  */
 export function ensureRealBets(): void {
-  void resolveRealBets().catch((e) => console.error('[real-bets] resolve error:', e))
-  void maybeGenerate().catch((e) => console.error('[real-bets] ensure error:', e))
+  void resolveRealBets().catch((e) => {
+    console.error('[real-bets] resolve error:', e)
+    logErrorBg('real-bets', 'Авто-расчёт прогнозов по реальным счётам не удался', e)
+  })
+  void maybeGenerate().catch((e) => {
+    console.error('[real-bets] ensure error:', e)
+    logErrorBg('real-bets', 'Фоновое обслуживание прогнозов не удалось', e)
+  })
   // Разбор логики звезды: добор для прогнозов без него (созд. до Task 37)
-  void ensureStarLogic().catch((e) => console.error('[real-bets] star-logic error:', e))
+  void ensureStarLogic().catch((e) => {
+    console.error('[real-bets] star-logic error:', e)
+    logErrorBg('real-bets', 'Не удалось приложить разбор логики «звезды» к прогнозу', e)
+  })
   // Ставка дня всегда живая: после расчёта вечерних матчей продвигаем следующий
-  void rotateBetOfDay().catch((e) => console.error('[real-bets] bet-of-day error:', e))
+  void rotateBetOfDay().catch((e) => {
+    console.error('[real-bets] bet-of-day error:', e)
+    logErrorBg('real-bets', 'Не удалось продвинуть «Ставку дня» на следующий матч', e)
+  })
 }
 
 /** Принудительная генерация (POST /api/real-bets/seed): обходит троттл,

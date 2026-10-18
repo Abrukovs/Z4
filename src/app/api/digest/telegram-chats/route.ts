@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { logErrorBg } from '@/lib/error-log'
 import { getDigestSettings, listTelegramChats } from '@/lib/digest'
 
 export const dynamic = 'force-dynamic'
@@ -39,6 +40,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ chats })
   } catch (error) {
     console.error('POST /api/digest/telegram-chats error:', error)
+    logErrorBg('api', 'Не удалось получить список чатов бота', error)
     return NextResponse.json({ error: 'Не удалось получить список чатов' }, { status: 500 })
   }
 }

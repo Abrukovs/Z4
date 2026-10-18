@@ -1,6 +1,8 @@
 import ZAI from 'z-ai-web-dev-sdk'
 import { promises as fs } from 'fs'
 import path from 'path'
+import { logErrorBg, logWarnBg } from '@/lib/error-log'
+import { sportLabel } from '@/lib/sports'
 import { SPORT_KEYS, type RealMatchDto, type RealMatchStatus, type SportKey } from '@/lib/types'
 
 /**
@@ -519,12 +521,22 @@ export async function getRealMatches(force = false, date = mskDateStr()): Promis
         // ошибка сети/лимит: не оставляем вид спорта пустым, если есть stale-кэш
         const stale = cacheByDate.get(date)
         if (stale) sports[s] = stale.data.sports[s] ?? []
+        // Журнал для владельца (Task 54): какой вид спорта не загрузился
+        logWarnBg('real-matches', `Расписание «${sportLabel(s)}» на ${date} не загрузилось — показываем последний снимок`, {
+          sport: s,
+          date,
+          haveStaleCache: Boolean(stale),
+        })
       }
     }
 
     // Пустой, но успешно загруженный день даёт okCount > 0 (парсер вернул [] —
     // это «массив», а не null). okCount === 0 — сеть/источник недоступны:
     if (okCount === 0) {
+      logErrorBg('real-matches', `Источник расписания (${SOURCE_NAME}) недоступен: не загрузился ни один вид спорта на ${date}`, undefined, {
+        date,
+        servedStale: Boolean(cached),
+      })
       if (cached) return cached.data // отдаём stale-кэш, НЕ затирая его пустым
       // холодный старт без сети: пустые данные, не кэшируем (след. тик повторит)
       return { date, fetchedAt: new Date().toISOString(), source: { name: SOURCE_NAME, urls }, sports }

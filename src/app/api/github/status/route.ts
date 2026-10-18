@@ -1,6 +1,7 @@
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { NextResponse } from 'next/server'
+import { logErrorBg } from '@/lib/error-log'
 
 export const dynamic = 'force-dynamic'
 
@@ -57,6 +58,7 @@ export async function GET() {
     })
   } catch (error) {
     console.error('GET /api/github/status error:', error)
+    logErrorBg('api', 'Не удалось получить состояние репозитория GitHub', error)
     return NextResponse.json(
       { ok: false, error: 'Не удалось получить состояние репозитория' },
       { status: 500 },

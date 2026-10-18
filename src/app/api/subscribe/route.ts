@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { db } from '@/lib/db'
+import { logErrorBg } from '@/lib/error-log'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,6 +43,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: false, reason: 'duplicate' })
     }
     console.error('POST /api/subscribe error:', error)
+    logErrorBg('api', 'Не удалось оформить подписку на рассылку', error)
     return NextResponse.json({ ok: false, error: 'Не удалось оформить подписку' }, { status: 500 })
   }
 }

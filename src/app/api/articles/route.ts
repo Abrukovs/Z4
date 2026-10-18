@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { logErrorBg } from '@/lib/error-log'
 import { countArticles, ensureFreshArticles, listArticles } from '@/lib/articles'
 import { ensureFreshData, maintenanceTick } from '@/lib/seed'
 
@@ -46,6 +47,7 @@ export async function GET(req: NextRequest) {
     })
   } catch (error) {
     console.error('GET /api/articles error:', error)
+    logErrorBg('api', 'Не удалось загрузить статью-разборы', error)
     return NextResponse.json({ error: 'Не удалось загрузить разборы' }, { status: 500 })
   }
 }

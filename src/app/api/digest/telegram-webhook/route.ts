@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { logErrorBg } from '@/lib/error-log'
 import { deleteTelegramWebhook, getDigestSettings } from '@/lib/digest'
 
 export const dynamic = 'force-dynamic'
@@ -31,6 +32,7 @@ export async function DELETE() {
     return NextResponse.json({ ok: true })
   } catch (error) {
     console.error('DELETE /api/digest/telegram-webhook error:', error)
+    logErrorBg('api', 'Не удалось отключить вебхук бота', error)
     return NextResponse.json({ error: 'Не удалось отключить вебхук' }, { status: 500 })
   }
 }

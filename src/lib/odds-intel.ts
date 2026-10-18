@@ -1,5 +1,6 @@
 import ZAI from 'z-ai-web-dev-sdk'
 import { db } from '@/lib/db'
+import { logErrorBg, logWarnBg } from '@/lib/error-log'
 
 /**
  * Линия рынка: web-search реальных котировок на наш выбор.
@@ -204,6 +205,9 @@ async function intelForBet(bet: IntelTarget): Promise<void> {
     items = await searchWeb(query)
   } catch {
     cached = null
+    logWarnBg('odds-intel', 'Поиск линии рынка недоступен — сравнение коэффициентов пропущено', {
+      query: query.slice(0, 200),
+    })
     // Поиск недоступен: фиксируем время проверки, чтобы не долбить API
     await db.bet.update({
       where: { id: bet.id },
@@ -298,10 +302,14 @@ export function refreshMarketIntel(): void {
         await intelForBet(bet)
       } catch (e) {
         console.error('odds-intel: ошибка обновления ставки', bet.id, e)
+        logErrorBg('odds-intel', 'Не удалось обновить линию рынка для прогноза', e, { betId: bet.id })
       }
     }
   })()
-    .catch((e) => console.error('odds-intel: фоновой проход упал', e))
+    .catch((e) => {
+      console.error('odds-intel: фоновой проход упал', e)
+      logErrorBg('odds-intel', 'Фоновое обновление линии рынка не удалось', e)
+    })
     .finally(() => {
       inflight = null
     })

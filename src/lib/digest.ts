@@ -1,4 +1,5 @@
 import { db } from '@/lib/db'
+import { logErrorBg } from '@/lib/error-log'
 import { betOutcome, scoreOf } from '@/lib/format'
 import { EXPRESS_STAKE } from '@/lib/express-history'
 import { parseStarLogic } from '@/lib/star-logic'
@@ -920,6 +921,7 @@ async function sendDailyDigestInner(auto: boolean): Promise<DigestSendOutcome> {
     await resolveRealBets()
   } catch (e) {
     console.error('sendDailyDigest: resolveRealBets error:', e)
+    logErrorBg('digest', 'Перед отправкой разбора не удалось рассчитать вчерашние матчи по счётам', e)
   }
 
   const digest = await buildDigest(1)
@@ -955,6 +957,16 @@ async function sendDailyDigestInner(auto: boolean): Promise<DigestSendOutcome> {
       message: html,
     },
   })
+
+  // Журнал ошибок (Task 54): владелец видит сбой доставки разбора в общем журнале
+  if (!sendOk) {
+    logErrorBg('digest', `Утренний разбор за ${digest.dateLabel} не доставлен в Telegram: ${sendError ?? 'неизвестная ошибка'}`, {
+      digestDate: digest.dateKey,
+      channel: auto ? 'telegram' : 'telegram-manual',
+      chunks: chunks.length,
+      error: sendError,
+    })
+  }
 
   return {
     sent: sendOk,
