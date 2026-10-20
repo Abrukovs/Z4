@@ -369,10 +369,31 @@ let state: PersistedState = loadState()
 /** Токен, который Telegram уже отклонил (401). Пока он не сменится в БД,
  * не долбим Telegram каждые 5 секунд и не заваливаем журнал ошибок. */
 let deadToken: string | null = null
+/** Когда в последний раз жаловались в журнал на конфликт getUpdates
+ * (не чаще раза в час — конфликт самозаживляется). */
+let lastConflictReportAt = 0
+
+/** Защита от bun --hot (Task 55): при ЛЮБОМ изменении файла (даже git
+ * checkout/rebase с тем же содержимым — меняется mtime) bun перезапускает
+ * модуль, но старый вечный pollLoop продолжал жить — и конфликтовал сам
+ * с собой (409 Conflict на каждом цикле). Каждое поколение модуля
+ * инкрементирует счётчик в globalThis; чужой (старый) цикл видит смену
+ * поколения и завершается — опросом владеет только свежий цикл. */
+const g = globalThis as { __botGen?: number }
+const myGen = (g.__botGen = (g.__botGen ?? 0) + 1)
+function isStaleGeneration(): boolean {
+  return g.__botGen !== myGen
+}
 
 async function pollLoop() {
   console.log(`[bot] poll loop started`)
   while (true) {
+    // hot-swap: нас сменило новое поколение модуля — тихо выходим,
+    // чтобы не было двух циклов getUpdates в одном процессе
+    if (isStaleGeneration()) {
+      console.log('[bot] newer module generation detected — старый цикл завершается')
+      return
+    }
     const token = settings.token
     if (!token) {
       stats.polling = false
@@ -418,6 +439,20 @@ async function pollLoop() {
           settings = readSettings()
           if (settings.token && settings.token !== deadToken) break // новый токен — сразу к опросу
         }
+        continue
+      }
+      // Конфликт двух getUpdates (двойной опрос/hot-swap) — обычно
+      // самозаживляется: не спамим журнал, пишем раз в час
+      if (/conflict/i.test(r.error ?? '')) {
+        if (Date.now() - lastConflictReportAt > 3600_000) {
+          lastConflictReportAt = Date.now()
+          reportErrorBg(
+            'Опрос бота прерван вторым getUpdates-запросом (двойной опрос). Обычно заживает само; если повторяется — перезапустите мини-сервис бота',
+            { error: r.error },
+          )
+        }
+        await sleep(3_000)
+        settings = readSettings()
         continue
       }
       reportErrorBg(
