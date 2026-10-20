@@ -366,6 +366,9 @@ let botInfo: { id: number; username?: string; first_name?: string } | null = nul
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 let state: PersistedState = loadState()
+/** Токен, который Telegram уже отклонил (401). Пока он не сменится в БД,
+ * не долбим Telegram каждые 5 секунд и не заваливаем журнал ошибок. */
+let deadToken: string | null = null
 
 async function pollLoop() {
   console.log(`[bot] poll loop started`)
@@ -396,12 +399,31 @@ async function pollLoop() {
       console.error('[poll] error:', r.error, r.code ?? '')
       // Понятная формулировка для владельца: 401 Unauthorized = токен отозван
       const unauthorized = /unauthorized/i.test(r.error ?? '')
+      if (unauthorized) {
+        // Мёртвый токен не долбим (Task 55): в журнал ругаемся ОДИН раз на
+        // токен, Telegram опрашиваем раз в 5 минут, а настройки (новый токен)
+        // перечитываем каждые 20с — владелец вставит токен на сайте, и бот
+        // оживёт почти сразу.
+        if (deadToken !== token) {
+          deadToken = token
+          reportErrorBg(
+            'Токен бота отклонён Telegram (Unauthorized): токен отозван или неверен. Нужен новый токен от @BotFather — вставьте его в настройках Telegram-раздела на сайте',
+            { error: r.error },
+          )
+        }
+        stats.polling = false
+        const deadline = Date.now() + 300_000
+        while (Date.now() < deadline) {
+          await sleep(SETTINGS_REFRESH_MS)
+          settings = readSettings()
+          if (settings.token && settings.token !== deadToken) break // новый токен — сразу к опросу
+        }
+        continue
+      }
       reportErrorBg(
-        unauthorized
-          ? 'Токен бота отклонён Telegram (Unauthorized): токен отозван или неверен. Нужен новый токен от @BotFather — вставьте его в настройках Telegram-раздела на сайте'
-          : r.code === 'webhook-active'
-            ? 'Опрос бота заблокирован: к боту подключён вебхук стороннего сервиса'
-            : 'Опрос Telegram не удался (сеть или лимиты)',
+        r.code === 'webhook-active'
+          ? 'Опрос бота заблокирован: к боту подключён вебхук стороннего сервиса'
+          : 'Опрос Telegram не удался (сеть или лимиты)',
         { error: r.error, code: r.code },
       )
       await sleep(r.code === 'webhook-active' ? 60_000 : 5_000)
@@ -409,6 +431,7 @@ async function pollLoop() {
       continue
     }
     stats.lastError = null
+    deadToken = null
     for (const u of r.result as { update_id: number; message?: TgMessage }[]) {
       state = { token, lastUpdateId: u.update_id }
       saveState(state)

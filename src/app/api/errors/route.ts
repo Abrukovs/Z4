@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { logErrorBg, logError, logWarn, type ErrorLogLevel } from '@/lib/error-log'
+import { logErrorBg, logError, logWarn, logInfo, type ErrorLogLevel } from '@/lib/error-log'
 
 export const dynamic = 'force-dynamic'
 
@@ -85,6 +85,8 @@ export async function POST(request: NextRequest) {
 
     if (level === 'error') {
       await logError(scope, message, undefined, body?.context as Record<string, unknown> | undefined)
+    } else if (level === 'info') {
+      await logInfo(scope, message, body?.context)
     } else {
       await logWarn(scope, message, body?.context)
     }
