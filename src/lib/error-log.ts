@@ -159,3 +159,7 @@ export function logErrorBg(
 export function logWarnBg(scope: string, message: string, context?: unknown): void {
   void logWarn(scope, message, context).catch(() => {})
 }
+
+export function logInfoBg(scope: string, message: string, context?: unknown): void {
+  void logInfo(scope, message, context).catch(() => {})
+}

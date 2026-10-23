@@ -1,5 +1,6 @@
 import { db } from '@/lib/db'
 import { logErrorBg, logWarnBg } from '@/lib/error-log'
+import { syncBetArchive } from '@/lib/bet-history'
 import type ZAI from 'z-ai-web-dev-sdk'
 import {
   getRealMatches,
@@ -1553,10 +1554,12 @@ async function maybeGenerate(): Promise<void> {
  * НЕ в ожидании: расчёт по счётам + фоновая генерация при нехватке прогнозов.
  */
 export function ensureRealBets(): void {
-  void resolveRealBets().catch((e) => {
-    console.error('[real-bets] resolve error:', e)
-    logErrorBg('real-bets', 'Авто-расчёт прогнозов по реальным счётам не удался', e)
-  })
+  void resolveRealBets()
+    .then(() => syncBetArchive(true)) // итоги расчёта — сразу в вечный архив
+    .catch((e) => {
+      console.error('[real-bets] resolve error:', e)
+      logErrorBg('real-bets', 'Авто-расчёт прогнозов по реальным счётам не удался', e)
+    })
   void maybeGenerate().catch((e) => {
     console.error('[real-bets] ensure error:', e)
     logErrorBg('real-bets', 'Фоновое обслуживание прогнозов не удалось', e)

@@ -4,7 +4,7 @@ import { betOutcome, scoreOf } from '@/lib/format'
 import { EXPRESS_STAKE } from '@/lib/express-history'
 import { parseStarLogic } from '@/lib/star-logic'
 import { resolveRealBets } from '@/lib/real-bets'
-import { readFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Bet, DigestSettings } from '@prisma/client'
 
@@ -772,6 +772,38 @@ export async function getDigestSettings(): Promise<DigestSettings> {
   return current
 }
 
+/**
+ * 23.10: немедленное зеркалирование настроек бота в .git/local-backup/.
+ * Раньше страховка обновлялась только бэкап-скриптом агента — если владелец
+ * сохранял новый токен вечером, ночной сброс успевал стереть его из БД
+ * ДО бэкапа, и утром восстанавливался СТАРЫЙ мёртвый токен (что и случилось:
+ * новый токен от 20.10 потерян). Теперь токен попадает в страховку
+ * в ту же секунду, когда владелец нажал «Сохранить» на сайте.
+ */
+function mirrorBotSettingsToStash(s: DigestSettings): void {
+  try {
+    const stashDir = join(process.cwd(), '.git', 'local-backup')
+    mkdirSync(stashDir, { recursive: true })
+    writeFileSync(
+      join(stashDir, 'bot-settings.json'),
+      JSON.stringify(
+        {
+          telegramBotToken: s.telegramBotToken,
+          telegramChatId: s.telegramChatId,
+          telegramChatTitle: s.telegramChatTitle,
+          sendHour: s.sendHour,
+          telegramEnabled: s.telegramEnabled,
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    )
+  } catch (e) {
+    console.error('[digest] mirror settings to stash error:', e)
+  }
+}
+
 export function publicSettings(s: DigestSettings): PublicDigestSettings {
   const token = s.telegramBotToken
   const preview = token
@@ -826,7 +858,10 @@ export async function saveDigestSettings(
   }
   if (patch.telegramEnabled !== undefined) data.telegramEnabled = patch.telegramEnabled
   if (patch.sendHour !== undefined) data.sendHour = patch.sendHour
-  return db.digestSettings.update({ where: { id: DIGEST_SETTINGS_ID }, data })
+  const saved = await db.digestSettings.update({ where: { id: DIGEST_SETTINGS_ID }, data })
+  mirrorBotSettingsToStash(saved) // 23.10: новый токен — СРАЗУ в страховку,
+  // иначе ночной сброс стирает его из БД раньше, чем агент успеет сделать бэкап
+  return saved
 }
 
 /* ------------------------ Отправка + журнал ----------------------- */

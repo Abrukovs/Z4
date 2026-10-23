@@ -46,6 +46,7 @@ import { StatusBadge } from '@/components/betting/status-badge'
 import { BetDetailsDialog } from '@/components/betting/bet-details-dialog'
 import { GitHubBackupCard } from '@/components/betting/github-backup-card'
 import { ErrorLogCard } from '@/components/betting/error-log-card'
+import { HistoryExportCard } from '@/components/betting/history-export-card'
 import { OverallSummary } from '@/components/betting/overall-summary'
 import { sportLabel, SPORT_COLORS, SPORT_LIST } from '@/lib/sports'
 import type { BetDto, StatsFilterState, StatsResponse } from '@/lib/types'
@@ -697,6 +698,10 @@ export function StatsView({
       {/* Резервная копия: владелец может вручную отправить код в GitHub
           (авто-пуш срабатывает раз в сутки) */}
       <GitHubBackupCard />
+
+      {/* Вечный архив истории: прошлые прогнозы экспертов больше не теряются
+          при ночных сбросах сервера + скачивание CSV (23.10) */}
+      <HistoryExportCard />
 
       {/* Журнал ошибок: сбои и предупреждения всех модулей с причинами
           (Task 54 — «не загрузилась ставка от Марии» без объяснений) */}

@@ -3,6 +3,7 @@ import { backfillBetOfDayFlags, ensureRealBets, forceGenerateRealBets } from '@/
 import { isBodEligible } from '@/lib/bod-rules'
 import { recomputeTipsterCounters } from '@/lib/tipster-counters'
 import { refreshMarketIntel } from '@/lib/odds-intel'
+import { restoreHistoryFromArchive, syncBetArchive } from '@/lib/bet-history'
 
 /**
  * Обслуживание данных сайта «Ставка Дня».
@@ -148,10 +149,14 @@ export async function maintenanceTick(force = false): Promise<void> {
   lastMaintenanceRun = ts
 
   await ensureTipsterRoster()
+  // Вечный архив (23.10): после ночного сброса сервера возвращаем историю
+  // прогнозов в БД из data/bet-history.json — один раз за процесс
+  await restoreHistoryFromArchive()
   await promoteBetOfDay()
   backfillBetOfDayFlags() // фон: свой троттл 10 мин, ошибки не роняют тик
   ensureRealBets() // фон: не ждём — LLM/сеть не должны тормозить роуты
   refreshMarketIntel() // фон: линия рынка (web-search), свой троттл 10 мин
+  void syncBetArchive().catch(() => {}) // фон: БД → вечный архив, свой троттл 10 мин
 }
 
 let inflight: Promise<void> | null = null

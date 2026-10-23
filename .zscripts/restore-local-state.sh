@@ -26,8 +26,22 @@ cd "$PROJECT_DIR"
 
 STASH="$PROJECT_DIR/.git/local-backup"
 SETTINGS_FILE="$STASH/bot-settings.json"
+ARCHIVE_FILE="$PROJECT_DIR/data/bet-history.json"
+ARCHIVE_MIRROR="$STASH/bet-history.json"
 
 echo "[restore] Проверка состояния после возможного сброса окружения…"
+
+# Вечный архив истории прогнозов: data/ — tracked в git, но незакоммиченные
+# изменения могут потеряться; зеркало в .git выживает всегда
+if [ ! -f "$ARCHIVE_FILE" ] && [ -f "$ARCHIVE_MIRROR" ]; then
+  mkdir -p "$PROJECT_DIR/data"
+  cp "$ARCHIVE_MIRROR" "$ARCHIVE_FILE"
+  echo "[restore] Архив истории прогнозов восстановлен из .git/local-backup/bet-history.json."
+fi
+if [ -f "$ARCHIVE_FILE" ]; then
+  BETS_COUNT=$(bun -e "console.log(JSON.parse(require('fs').readFileSync('$ARCHIVE_FILE','utf8')).bets.length)" 2>/dev/null | tail -1)
+  echo "[restore] Вечный архив на месте: ${BETS_COUNT:-?} прогнозов в истории."
+fi
 
 if [ ! -f "$PROJECT_DIR/db/custom.db" ]; then
   echo "[restore] ВНИМАНИЕ: db/custom.db отсутствует — стартовые скрипты создадут её,"
