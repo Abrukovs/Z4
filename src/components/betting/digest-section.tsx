@@ -788,13 +788,65 @@ export function DigestSection() {
                 <Bot className="size-4.5 text-emerald-600" aria-hidden />
                 Настройка бота — 3 шага
               </h3>
-              <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-700">
-                <span className="relative flex size-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-                  <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
-                </span>
-                Бот на связи и отвечает мгновенно
-              </p>
+              {/* 24.10: живой статус бота вместо «зелёной точки всегда» —
+                  владелец видит причину молчания рассылки сразу */}
+              {data?.bot?.online && !data.bot.lastError && data.bot.polling ? (
+                <p
+                  className="flex items-center gap-1.5 text-xs font-medium text-emerald-700"
+                  aria-live="polite"
+                >
+                  <span className="relative flex size-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                    <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+                  </span>
+                  Бот на связи{data.bot.username ? ` (@${data.bot.username})` : ''} — рассылка
+                  работает
+                </p>
+              ) : data?.bot?.lastError === 'Unauthorized' ? (
+                <div
+                  role="alert"
+                  className="flex flex-col gap-1.5 rounded-xl border border-rose-200 bg-rose-500/10 p-3.5 text-xs leading-relaxed text-rose-700"
+                >
+                  <p className="flex items-center gap-1.5 text-sm font-bold text-rose-700">
+                    <span className="grid size-4 shrink-0 place-items-center rounded-full bg-rose-500 text-[10px] font-bold text-white">
+                      !
+                    </span>
+                    Рассылка не работает: Telegram отклонил токен
+                  </p>
+                  <p>
+                    Именно поэтому утренние разборы не приходят. Вставьте новый токен от{' '}
+                    <span className="font-semibold">@BotFather</span> (меню бота → API Token →
+                    «Revoke current token») в поле ниже и нажмите «Сохранить» — бот оживёт сам за
+                    ~20 секунд. Причина: сброс сервера стёр сохранённый токен, подставился старый
+                    отозванный. Теперь токен хранится в защищённой копии и больше не потеряется.
+                  </p>
+                </div>
+              ) : data?.bot?.online && data.bot.lastError ? (
+                <p
+                  className="flex items-center gap-1.5 text-xs font-medium text-amber-700"
+                  aria-live="polite"
+                >
+                  <span className="relative flex size-2">
+                    <span className="relative inline-flex size-2 rounded-full bg-amber-500" />
+                  </span>
+                  Бот работает с ошибкой: {data.bot.lastError}
+                </p>
+              ) : data?.bot === null ? (
+                <p className="flex items-center gap-1.5 text-xs font-medium text-amber-700">
+                  <span className="relative flex size-2">
+                    <span className="relative inline-flex size-2 rounded-full bg-amber-500" />
+                  </span>
+                  Не удалось проверить состояние бота — обновите страницу через минуту
+                </p>
+              ) : (
+                <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-700">
+                  <span className="relative flex size-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                    <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+                  </span>
+                  Бот на связи и отвечает мгновенно
+                </p>
+              )}
 
               <ol className="flex flex-col gap-2.5 text-sm text-zinc-600">
                 <li className="flex gap-2.5">
@@ -805,9 +857,18 @@ export function DigestSection() {
                     Бот создаётся в Telegram у{' '}
                     <span className="font-semibold text-zinc-800">@BotFather</span> (команда{' '}
                     <span className="font-mono text-xs">/newbot</span>)
-                    {data?.settings.hasToken && (
-                      <span className="font-semibold text-emerald-700"> — токен уже сохранён ✓</span>
-                    )}
+                    {data?.settings.hasToken &&
+                      (data?.bot?.lastError === 'Unauthorized' ? (
+                        <span className="font-semibold text-rose-700">
+                          {' '}
+                          — токен отклонён Telegram, нужен новый ↓
+                        </span>
+                      ) : (
+                        <span className="font-semibold text-emerald-700">
+                          {' '}
+                          — токен уже сохранён ✓
+                        </span>
+                      ))}
                   </span>
                 </li>
                 <li className="flex gap-2.5">

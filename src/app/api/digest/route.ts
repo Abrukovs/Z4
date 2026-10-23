@@ -10,8 +10,41 @@ import {
   moscowHourNow,
   sendDailyDigest,
 } from '@/lib/digest'
+import type { BotHealthDto } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
+
+const BOT_SERVICE_HEALTH_URL = 'http://localhost:3033/health'
+
+/** Живое состояние мини-сервиса бота (для статуса в разделе Telegram).
+ *  Секретов не отдаём: только «жив/мёртв» и последняя ошибка опроса. */
+async function fetchBotHealth(): Promise<BotHealthDto | null> {
+  try {
+    const r = await fetch(BOT_SERVICE_HEALTH_URL, {
+      cache: 'no-store',
+      signal: AbortSignal.timeout(2500),
+    })
+    if (!r.ok) return null
+    const h = (await r.json()) as {
+      ok?: boolean
+      bot?: string | null
+      hasToken?: boolean
+      polling?: boolean
+      lastError?: string | null
+      lastPollAt?: string | null
+    }
+    return {
+      online: !!h.ok,
+      username: h.bot ?? null,
+      hasToken: !!h.hasToken,
+      polling: !!h.polling,
+      lastError: h.lastError ?? null,
+      lastPollAt: h.lastPollAt ?? null,
+    }
+  } catch {
+    return null
+  }
+}
 
 /**
  * GET /api/digest — данные рассылки: ЕДИНОЕ утреннее сообщение за вчера
@@ -41,10 +74,11 @@ export async function GET() {
     }
     // Автодосылка пропущенного сообщения — fire-and-forget, не блокирует ответ
     void sendDailyDigest(true).catch((e) => console.error('digest catch-up error:', e))
-    const [digest, settings, logs] = await Promise.all([
+    const [digest, settings, logs, bot] = await Promise.all([
       buildDigest(1),
       getDigestSettings(),
       getRecentDigestLogs(6),
+      fetchBotHealth(),
     ])
     return NextResponse.json({
       digest: {
@@ -61,6 +95,8 @@ export async function GET() {
       logs,
       /** Текущий час по МСК и час отправки — для подписи «ждём N:00» */
       moscowHour: moscowHourNow(),
+      /** Живое состояние бота: зелёный свет или «токен отклонён» */
+      bot,
     })
   } catch (error) {
     console.error('GET /api/digest error:', error)

@@ -443,6 +443,21 @@ export interface DigestLogDto {
   createdAt: string
 }
 
+/** Состояние мини-сервиса Telegram-бота (опрос :3033/health; без секретов).
+ *  24.10: владелец должен ВИДЕТЬ, жива ли рассылка, а не гадать по тишине. */
+export interface BotHealthDto {
+  /** мини-сервис отвечает */
+  online: boolean
+  /** username бота, напр. «BetCompassBot» */
+  username: string | null
+  hasToken: boolean
+  /** активный опрос Telegram (false при мёртвом токене/выключенной рассылке) */
+  polling: boolean
+  /** последняя ошибка опроса: «Unauthorized» = токен отклонён Telegram */
+  lastError: string | null
+  lastPollAt: string | null
+}
+
 export interface DigestResponse {
   digest: DigestDataDto
   /** Текст единого утреннего сообщения (итог + полный разбор зашедших) */
@@ -450,6 +465,8 @@ export interface DigestResponse {
   settings: DigestSettingsDto
   logs: DigestLogDto[]
   moscowHour: number
+  /** Живое состояние бота (null — мини-сервис недоступен) */
+  bot: BotHealthDto | null
 }
 
 export interface DigestSendResponse {
