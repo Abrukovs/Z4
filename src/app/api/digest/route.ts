@@ -87,6 +87,9 @@ export async function GET() {
         betOfDay: digest.betOfDay,
         express: digest.express,
         star: digest.star,
+        expertWins: digest.expertWins,
+        otherWins: digest.otherWins,
+        misses: digest.misses,
         summary: digest.summary,
       },
       /** Точный текст единого утреннего сообщения (с настройкой часа) */
