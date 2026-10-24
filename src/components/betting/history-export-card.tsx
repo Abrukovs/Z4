@@ -7,6 +7,7 @@ import {
   CalendarRange,
   Download,
   Loader2,
+  RefreshCcw,
   TriangleAlert,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -17,6 +18,14 @@ interface ArchiveMeta {
   firstDate: string | null
   lastDate: string | null
   updatedAt: string | null
+}
+
+interface RetroSettleResponse {
+  ok: boolean
+  processed: number
+  settled: number
+  stayed: number
+  lines: string[]
 }
 
 function plural(n: number, forms: [string, string, string]): string {
@@ -38,12 +47,20 @@ function fmtDate(iso: string | null): string {
  * каждый пик навсегда хранится в вечном архиве (data/bet-history.json,
  * копия в GitHub). Кнопка скачивает ВСЮ историю файлом CSV —
  * открывается в Excel.
+ *
+ * 24.10: кнопка «Рассчитать возвраты» — досчитывает восстановленные из
+ * архива возвраты по реальным счётам (расписание той даты → веб-поиск),
+ * чтобы у экспертов было честное «зашло/мимо», а не «возврат».
  */
 export function HistoryExportCard() {
   const [meta, setMeta] = useState<ArchiveMeta | null>(null)
   const [loading, setLoading] = useState(true)
   const [downloading, setDownloading] = useState(false)
   const [error, setError] = useState(false)
+
+  const [settling, setSettling] = useState(false)
+  const [settleResult, setSettleResult] = useState<RetroSettleResponse | null>(null)
+  const [settleError, setSettleError] = useState(false)
 
   const loadMeta = useCallback(async () => {
     setLoading(true)
@@ -83,6 +100,22 @@ export function HistoryExportCard() {
       setError(true)
     } finally {
       setDownloading(false)
+    }
+  }
+
+  const settleReturns = async () => {
+    setSettling(true)
+    setSettleError(false)
+    try {
+      const r = await fetch('/api/bets/retro-settle', { method: 'POST' })
+      if (!r.ok) throw new Error('status ' + r.status)
+      const payload = (await r.json()) as RetroSettleResponse
+      setSettleResult(payload)
+      await loadMeta()
+    } catch {
+      setSettleError(true)
+    } finally {
+      setSettling(false)
     }
   }
 
@@ -135,25 +168,70 @@ export function HistoryExportCard() {
                 </>
               )}
             </div>
-            <Button
-              onClick={download}
-              disabled={downloading || loading || (meta?.total ?? 0) === 0}
-              className="w-full gap-2 border-zinc-200 bg-white text-zinc-800 hover:bg-zinc-50 sm:w-auto"
-              variant="outline"
-              aria-label="Скачать историю прогнозов файлом CSV"
-            >
-              {downloading ? (
-                <Loader2 className="size-4 animate-spin" aria-hidden />
-              ) : (
-                <Download className="size-4" aria-hidden />
-              )}
-              Скачать историю (CSV)
-            </Button>
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+              <Button
+                onClick={settleReturns}
+                disabled={settling || loading}
+                className="w-full gap-2 border-emerald-200 bg-emerald-50/80 text-emerald-800 hover:bg-emerald-100 sm:w-auto"
+                variant="outline"
+                aria-label="Рассчитать возвраты по реальным счётам матчей"
+              >
+                {settling ? (
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                ) : (
+                  <RefreshCcw className="size-4" aria-hidden />
+                )}
+                Рассчитать возвраты
+              </Button>
+              <Button
+                onClick={download}
+                disabled={downloading || loading || (meta?.total ?? 0) === 0}
+                className="w-full gap-2 border-zinc-200 bg-white text-zinc-800 hover:bg-zinc-50 sm:w-auto"
+                variant="outline"
+                aria-label="Скачать историю прогнозов файлом CSV"
+              >
+                {downloading ? (
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                ) : (
+                  <Download className="size-4" aria-hidden />
+                )}
+                Скачать историю (CSV)
+              </Button>
+            </div>
           </div>
+
+          {/* Итог ретро-расчёта: что рассчитано, что осталось возвратом */}
+          {settleError && (
+            <p className="mt-3 flex items-center gap-2 rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-700" role="alert">
+              <TriangleAlert className="size-3.5 shrink-0" aria-hidden />
+              Не удалось рассчитать возвраты — попробуйте ещё раз через минуту
+            </p>
+          )}
+          {settleResult && (
+            <div className="mt-3 rounded-xl border border-emerald-200/70 bg-emerald-500/[0.05] p-3.5">
+              <p className="text-sm font-semibold text-zinc-800">
+                {settleResult.processed === 0
+                  ? 'Возвратов из архива не найдено — рассчитывать нечего ✅'
+                  : `Рассчитано по реальным счётам: ${settleResult.settled} из ${settleResult.processed}${settleResult.stayed > 0 ? ` · остались возвратами: ${settleResult.stayed}` : ''}`}
+              </p>
+              {settleResult.lines.length > 0 && (
+                <ul className="mt-2 max-h-44 flex flex-col gap-1 overflow-y-auto text-xs leading-relaxed text-zinc-600">
+                  {settleResult.lines.map((line, i) => (
+                    <li key={i} className="flex items-start gap-1.5">
+                      <span aria-hidden className="mt-0.5 shrink-0 text-zinc-400">•</span>
+                      <span className="min-w-0">{line}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
           <p className="mt-3 text-[11px] text-zinc-500">
-            Файл открывается в Excel: дата, эксперт, матч, коэффициент, итог.
-            Если сбой оборвал расчёт матча — прогноз помечается «возврат»
-            и не портит статистику.
+            «Рассчитать возвраты» — если сбой оборвал расчёт матча и прогноз
+            помечался «возврат», кнопка найдёт реальный счёт и поставит честное
+            «зашло» или «мимо». Файл CSV открывается в Excel: дата, эксперт,
+            матч, коэффициент, итог.
           </p>
         </CardContent>
       </Card>

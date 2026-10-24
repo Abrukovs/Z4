@@ -1,5 +1,5 @@
 import { db } from '@/lib/db'
-import { logErrorBg, logWarnBg } from '@/lib/error-log'
+import { logErrorBg, logInfoBg, logWarnBg } from '@/lib/error-log'
 import { syncBetArchive } from '@/lib/bet-history'
 import type ZAI from 'z-ai-web-dev-sdk'
 import {
@@ -1276,7 +1276,10 @@ async function searchScoreViaWeb(bet: {
           if (!isTennisTotal && a <= 2 && b <= 2 && a + b >= 1) {
             return { score: `${a}:${b}`, source: r.host_name }
           }
-        } else if (a <= 200 && b <= 200) {
+        } else if (a <= 200 && b <= 200 && (bet.sport !== 'basketball' || (a >= 40 && b >= 40))) {
+          // Баскетбол: обе команды в итоговом счёте набирают 40+ очков.
+          // Обрывки вроде «17:0» (спурт одной команды) — не итог, отклоняем
+          // (инцидент 24.10: «Галатасарай — Страсбур 17:0» из сниппета sofascore)
           return { score: `${a}:${b}`, source: r.host_name }
         }
       }
@@ -1419,6 +1422,118 @@ export async function resolveRealBets(): Promise<void> {
   }
 
   if (updated > 0) await recomputeTipsterCounters()
+}
+
+/* ------- Ретро-расчёт восстановленных возвратов (просьба 24.10) -------- */
+
+/** Пометка «восстановлено из архива» — ретро-расчёт трогает ТОЛЬКО такие возвраты */
+const RESTORED_NOTE_PREFIX = 'Восстановлено из вечного архива'
+/** Бюджет веб-поиска за один запуск ретро-расчёта (вежливость к поисковику) */
+const RETRO_WEB_BUDGET = 12
+/** Троттл повторных запусков (кнопка + авто) — не чаще раза в 5 минут */
+const RETRO_THROTTLE_MS = 5 * 60_000
+
+const globalForRetro = globalThis as unknown as { __retroSettleLastRun?: number }
+
+export interface RetroSettleResult {
+  /** Возвратов-кандидатов нашлось (восстановленных из архива) */
+  processed: number
+  /** Рассчитаны по реальным счётам: зашло / мимо */
+  settled: number
+  /** Остались возвратами — счёт найти не удалось */
+  stayed: number
+  /** Человекочитаемый итог по каждому матчу — для ответа владельцу */
+  lines: string[]
+}
+
+/**
+ * «Рассчитайте уцелевшие прогнозы» (владелец, 24.10). Ночные сбросы платформы
+ * обрывали авто-расчёт, и восстановленные из вечного архива прогнозы честно
+ * помечались возвратами. Но матчи давно сыграли — пробуем рассчитать их
+ * ПО РЕАЛЬНЫМ СЧЁТАМ: сначала страница расписания за ту дату источника,
+ * затем запасной веб-поиск (как в resolveRealBets). Трогаем только возвраты
+ * с пометкой архива — обычные возвраты (отмена матча и т.п.) неприкосновенны.
+ * Идемпотентно: рассчитанный прогноз получает настоящий статус и больше
+ * не попадает в выборку.
+ */
+export async function retroSettleRestoredVoids(force = false): Promise<RetroSettleResult> {
+  const lastRun = globalForRetro.__retroSettleLastRun ?? 0
+  if (!force && Date.now() - lastRun < RETRO_THROTTLE_MS) {
+    return {
+      processed: 0,
+      settled: 0,
+      stayed: 0,
+      lines: ['Ретро-расчёт уже запускался меньше 5 минут назад — повторите чуть позже.'],
+    }
+  }
+  globalForRetro.__retroSettleLastRun = Date.now()
+
+  const voids = await db.bet.findMany({
+    where: { status: 'void', resultNote: { startsWith: RESTORED_NOTE_PREFIX } },
+    orderBy: { matchDate: 'asc' },
+  })
+  const res: RetroSettleResult = { processed: voids.length, settled: 0, stayed: 0, lines: [] }
+  if (voids.length === 0) {
+    res.lines.push('Возвратов из архива не найдено — рассчитывать нечего.')
+    return res
+  }
+
+  const dateCache = new Map<string, RealMatchesData | null>()
+  let webBudget = RETRO_WEB_BUDGET
+
+  for (const bet of voids) {
+    const dateStr = mskDateOf(bet.matchDate.getTime())
+    if (!dateCache.has(dateStr)) {
+      dateCache.set(
+        dateStr,
+        (await withTimeout(getRealMatches(false, dateStr), 25_000)) ?? null,
+      )
+    }
+    const data = dateCache.get(dateStr) ?? null
+    const list = data?.sports[bet.sport as SportKey] ?? []
+    const m = list.find((x) => x.home === bet.homeTeam && x.away === bet.awayTeam)
+
+    let verdict: { status: 'won' | 'lost'; note: string } | null = null
+    let srcNote = ''
+    if (m?.status === 'finished' && m.score) {
+      // Расписание источника хранит архив дат: считаем по его счёту
+      verdict = evaluateRealBet(bet, m.score)
+    } else if (webBudget > 0) {
+      // Матча нет на странице той даты — запасной веб-поиск счёта
+      webBudget--
+      const hit = await searchScoreViaWeb(bet)
+      if (hit) {
+        verdict = evaluateRealBet(bet, hit.score)
+        srcNote = ` · счёт по данным веб-поиска (${hit.source})`
+      }
+    }
+
+    const label = `${bet.homeTeam} — ${bet.awayTeam}`
+    if (verdict) {
+      await db.bet.update({
+        where: { id: bet.id },
+        data: { status: verdict.status, resultNote: verdict.note + srcNote },
+      })
+      res.settled++
+      res.lines.push(
+        `${label} · ${verdict.status === 'won' ? 'зашёл ✅' : 'не зашёл ❌'} — ${verdict.note}${srcNote}`,
+      )
+    } else {
+      res.stayed++
+      res.lines.push(`${label} — реальный счёт не нашёлся, остаётся возвратом`)
+    }
+  }
+
+  if (res.settled > 0) {
+    await recomputeTipsterCounters()
+    await syncBetArchive(true) // вечный архив запоминает настоящие итоги
+    logInfoBg(
+      'real-bets',
+      `Ретро-расчёт возвратов: ${res.settled} из ${res.processed} восстановленных прогнозов рассчитаны по реальным счётам`,
+      { settled: res.settled, stayed: res.stayed },
+    )
+  }
+  return res
 }
 
 /* ------------------------- Обслуживание (tick) ----------------------- */

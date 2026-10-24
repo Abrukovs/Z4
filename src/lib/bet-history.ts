@@ -158,9 +158,12 @@ async function writeArchive(map: Map<string, ArchivedBet>): Promise<void> {
     bets,
   }
   const json = JSON.stringify(payload, null, 1)
-  // атомарная запись: временный файл + rename
+  // атомарная запись: временный файл + rename. Имя tmp уникально для
+  // каждого вызова (PID + счётчик): параллельные синхронизации (тик
+  // обслуживания + ретро-расчёт) больше не топчут один файл — инцидент
+  // 24.10 «ENOENT rename .tmp» при гонке двух sync'ов.
   await fs.mkdir(ARCHIVE_DIR, { recursive: true })
-  const tmp = `${ARCHIVE_PATH}.tmp`
+  const tmp = `${ARCHIVE_PATH}.${process.pid}.${Date.now()}.tmp`
   await fs.writeFile(tmp, json, 'utf8')
   await fs.rename(tmp, ARCHIVE_PATH)
   // зеркало в .git/local-backup (переживает любые сбросы)

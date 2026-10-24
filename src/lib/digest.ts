@@ -106,9 +106,15 @@ export interface DigestData {
   express: DigestExpress | null
   /** Прогноз по теннису (бывший блок «звезды»); в сообщении — без имени */
   star: { tipsterName: string; tipsterRole: string; sport: string; picks: DigestPick[] } | null
+  /** Зашедшие прогнозы ВСЕХ экспертов (вкл. звезду), не СД и не ноги экспресса —
+   *  детальный блок «успешные прогнозы экспертов» (просьба владельца 24.10) */
+  expertWins: DigestPick[]
   /** Прочие ЗАШЕДШИЕ прогнозы дня (лента: не СД/экспресс/эксперт) —
    *  строка «Ещё зашло: …» в кратком сообщении (Task 44) */
   otherWins: DigestPick[]
+  /** Рассчитанные НЕзашедшие (мимо + возвраты) — краткий блок честной
+   *  картины дня в конце сообщения (просьба «разбор поподробнее», 24.10) */
+  misses: DigestPick[]
   summary: DigestSummary
   /** Готовое сообщение для Telegram (HTML) — единый утренний разбор */
   telegramHtml: string
@@ -274,20 +280,32 @@ export async function buildDigest(offsetDays = 1): Promise<DigestData> {
   // Дедупликация: прогноз «звезды», ставший «Ставкой дня», уже показан в
   // блоке BOD — не дублируем его в секции топ-эксперта.
   const bodIds = new Set(betOfDay.map((p) => p.id))
+  const legIds = new Set((express?.legs ?? []).map((l) => l.id))
   const starPicks = star
     ? dayBets
         .filter((b) => b.tipsterId === star.id && !bodIds.has(b.id))
         .map(toPick)
     : []
 
-  // Прочие зашедшие исходы дня (лента): не СД, не нога экспресса, не
-  // прогноз эксперта — попадают в строку «Ещё зашло: …» краткого сообщения
-  const legIds = new Set((express?.legs ?? []).map((l) => l.id))
-  const starIds = new Set(starPicks.map((p) => p.id))
+  // Успешные прогнозы ВСЕХ экспертов (включая звезду): не «Ставка дня»
+  // и не нога экспресса — детальный блок сообщения (24.10, просьба
+  // «не забывайте присылать также успешные прогнозы от экспертов»)
+  const expertWins = dayBets
+    .filter((b) => b.tipsterId && b.status === 'won' && !bodIds.has(b.id) && !legIds.has(b.id))
+    .map(toPick)
+
+  // Прочие зашедшие исходы дня (лента БЕЗ эксперта): не СД, не нога
+  // экспресса, не прогноз эксперта — попадают в строку «Ещё зашло: …»
   const otherWins = dayBets
     .filter(
-      (b) => b.status === 'won' && !bodIds.has(b.id) && !legIds.has(b.id) && !starIds.has(b.id),
+      (b) => b.status === 'won' && !b.tipsterId && !bodIds.has(b.id) && !legIds.has(b.id),
     )
+    .map(toPick)
+
+  // Рассчитанные, но не зашедшие (мимо + возвраты) — краткий блок
+  // честной картины дня («разбор поподробнее вчерашних»)
+  const misses = dayBets
+    .filter((b) => b.status === 'lost' || b.status === 'void')
     .map(toPick)
 
   const settled = dayBets.filter((b) => b.status !== 'pending')
@@ -310,7 +328,9 @@ export async function buildDigest(offsetDays = 1): Promise<DigestData> {
     star: star
       ? { tipsterName: star.name, tipsterRole: star.role, sport: star.sport, picks: starPicks }
       : null,
+    expertWins,
     otherWins,
+    misses,
     summary,
     telegramHtml: '',
   }
@@ -406,20 +426,18 @@ export function buildTelegramHtml(d: DigestData, sendHour = 9): string {
     if (d.express.status === 'won' || wonLegs.length > 0) parts.push('')
   }
 
-  // Прогноз эксперта — только зашедший и ещё не показанный в экспрессе
-  // (экспертная ставка могла попасть в топ-3 по уверенности — не дублируем)
-  if (d.star) {
-    const emoji = SPORT_EMOJI[d.star.sport] ?? '⭐'
-    const legIds = new Set((d.express?.legs ?? []).map((l) => l.id))
-    for (const p of d.star.picks.filter((x) => x.status === 'won' && !legIds.has(x.id))) {
-      const score = p.score ? ` · ${esc(p.score)}` : ''
-      parts.push(`<b>${emoji} Прогноз эксперта — зашёл ✅</b>`)
-      parts.push(`${esc(p.homeTeam)} — ${esc(p.awayTeam)} · ${esc(p.league)}`)
-      parts.push(`${esc(p.selection)} @${p.odds.toFixed(2)} · ${fmtProfit(p.profit)}${score}`)
-      const why = (p.thesis ?? p.analysis ?? '').trim()
-      if (why) parts.push(`📖 ${esc(fullText(why))}`)
-      parts.push('')
-    }
+  // 🎯 Успешные прогнозы экспертов — детально, с именем аналитика и полным
+  // разбором (просьба 24.10). expertWins уже очищен от «Ставки дня» и ног
+  // экспресса в buildDigest — дублей не будет.
+  for (const p of d.expertWins) {
+    const emoji = SPORT_EMOJI[p.sport] ?? '⭐'
+    const score = p.score ? ` · ${esc(p.score)}` : ''
+    parts.push(`<b>${emoji} ${esc(p.tipsterName ?? 'Эксперт')} — прогноз зашёл ✅</b>`)
+    parts.push(`${esc(p.homeTeam)} — ${esc(p.awayTeam)} · ${esc(p.league)}`)
+    parts.push(`${esc(p.selection)} @${p.odds.toFixed(2)} · ${fmtProfit(p.profit)}${score}`)
+    const why = (p.thesis ?? p.analysis ?? '').trim()
+    if (why) parts.push(`📖 Полный разбор: ${esc(fullText(why))}`)
+    parts.push('')
   }
 
   // Прочие зашедшие исходы дня (лента) — одной строкой «Ещё зашло»
@@ -434,9 +452,25 @@ export function buildTelegramHtml(d: DigestData, sendHour = 9): string {
     parts.push('')
   }
 
+  // 📉 Честная картина дня: рассчитанные не зашедшие — по строке на матч
+  // (мимо с счётом, возвраты с пометкой), чтобы разбор был действительно
+  // «поподробнее вчерашних» (просьба 24.10)
+  if (d.misses.length > 0) {
+    const lines = d.misses.map((p) => {
+      const score = p.score ? ` · ${esc(p.score)}` : ''
+      const tag = p.status === 'lost' ? 'мимо' : 'возврат'
+      const who = p.tipsterName ? `${esc(p.tipsterName)}: ` : ''
+      return `• ${who}${esc(p.homeTeam)} — ${esc(p.awayTeam)} · ${esc(shortSelection(p.selection))} @${p.odds.toFixed(2)} — ${tag}${score}`
+    })
+    parts.push(`<b>📉 Мимо и возвраты (${d.misses.length}):</b>`)
+    parts.push(lines.join('\n'))
+    parts.push('')
+  }
+
   const hasWins =
     d.betOfDay.some((x) => x.status === 'won') ||
     (!!d.express && d.express.legs.some((l) => l.status === 'won')) ||
+    d.expertWins.length > 0 ||
     (!!d.star && d.star.picks.some((p) => p.status === 'won')) ||
     d.otherWins.length > 0
 
@@ -699,7 +733,7 @@ export async function sendWelcomeOnce(
   const html = [
     '✅ <b>Бот «Ставка Дня» подключён</b>',
     '',
-    `Каждое утро в ${sendHour}:00 МСК — одно сообщение за вчерашний день: итог (сколько зашло/мимо) и полный разбор зашедших главных ставок — «Ставка дня», исходы «Экспресса дня» и прогноз эксперта с обоснованием.`,
+    `Каждое утро в ${sendHour}:00 МСК — одно сообщение за вчерашний день: итог (сколько зашло/мимо/возвратов), детальный разбор зашедших — «Ставка дня», «Экспресс дня» и успешные прогнозы всех экспертов с обоснованием, краткий список не зашедших.`,
     '',
     '— «Ставка Дня» · 18+',
   ].join('\n')

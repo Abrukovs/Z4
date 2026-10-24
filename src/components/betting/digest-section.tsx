@@ -49,14 +49,6 @@ import { cn } from '@/lib/utils'
 /** Часы отправки утреннего разбора (МСК) — варианты для селекта */
 const HOUR_OPTIONS = [7, 8, 9, 10, 11, 12]
 
-/** Название вида спорта для заголовков блоков (без имён экспертов) */
-const SPORT_LABEL: Record<string, string> = {
-  tennis: 'Теннис',
-  football: 'Футбол',
-  hockey: 'Хоккей',
-  basketball: 'Баскетбол',
-}
-
 /** HTML Telegram → читаемый текст для предпросмотра */
 function telegramPreview(html: string): string {
   return html
@@ -96,11 +88,14 @@ function PickRow({
   pick,
   accent,
   whyLabel,
+  who,
 }: {
   pick: DigestPickDto
   accent: 'bod' | 'star' | 'express'
   /** Подпись к разбору «почему» (по умолчанию — без подписи) */
   whyLabel?: string
+  /** Имя эксперта — бейдж на карточке (блок «успешные прогнозы экспертов») */
+  who?: string | null
 }) {
   const [expanded, setExpanded] = useState(false)
   const meta = STATUS_ICON[pick.status] ?? STATUS_ICON.pending
@@ -129,8 +124,13 @@ function PickRow({
         <AccentIcon className="size-4.5" />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-zinc-900">
-          {pick.homeTeam} — {pick.awayTeam}
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-semibold text-zinc-900">
+          <span className="truncate">{pick.homeTeam} — {pick.awayTeam}</span>
+          {who && (
+            <span className="shrink-0 rounded-md bg-amber-500/10 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700">
+              {who}
+            </span>
+          )}
         </p>
         <p className="mt-0.5 truncate text-xs text-zinc-500">
           {pick.league} · {pick.selection} @{pick.odds.toFixed(2)}
@@ -450,18 +450,15 @@ export function DigestSection() {
   const digest = data?.digest
   const summary = digest?.summary
   const plainPreview = data ? telegramPreview(data.telegramHtml) : ''
-  // Показываем только зашедшее — зеркально Telegram-сообщению (формат
-  // Task 42/46/50: разбор проигравших не рассылаем, без имён экспертов)
+  // Зеркалим Telegram-сообщение: детально — зашедшее (СД, экспресс,
+  // успешные прогнозы ВСЕХ экспертов с именами), кратко — мимо/возвраты
   const wonBod = digest?.betOfDay.filter((p) => p.status === 'won') ?? []
   const expressWonLegs = digest?.express?.legs.filter((l) => l.status === 'won') ?? []
-  // эксперт мог попасть в топ-3 экспресса — не дублируем его карточку
-  const expressLegIds = new Set(expressWonLegs.map((l) => l.id))
-  const wonStarPicks =
-    digest?.star?.picks.filter((p) => p.status === 'won' && !expressLegIds.has(p.id)) ?? []
-  const hasWins = wonBod.length > 0 || expressWonLegs.length > 0 || wonStarPicks.length > 0
-  const starSportLabel = digest?.star
-    ? (SPORT_LABEL[digest.star.sport] ?? digest.star.sport)
-    : null
+  // expertWins отфильтрован на бэкенде: без «Ставки дня» и ног экспресса
+  const expertWinList = digest?.expertWins ?? []
+  const missList = digest?.misses ?? []
+  const hasWins =
+    wonBod.length > 0 || expressWonLegs.length > 0 || expertWinList.length > 0
 
   const configured =
     !!data?.settings.hasToken && !!data?.settings.telegramChatId && !!data?.settings.telegramEnabled
@@ -475,7 +472,7 @@ export function DigestSection() {
       <SectionHeader
         eyebrow="Уведомления"
         title="Telegram-рассылка: утром — итог и полный разбор"
-        subtext="Одно сообщение в сутки — как вы просили, чат не перегружаем. Каждое утро: сводка вчерашнего дня «сколько зашло / мимо», затем полный разбор зашедших главных ставок — «Ставка дня» со счётом и всей аргументацией, зашедшие исходы «Экспресса дня» с разбором каждой ноги и прогноз эксперта целиком. Проигравшие не разбираем — фокус на зашедшем"
+        subtext="Одно сообщение в сутки — как вы просили, чат не перегружаем. Каждое утро: сводка вчерашнего дня «сколько зашло / мимо / возвратов», полный разбор зашедших главных ставок — «Ставка дня» со счётом и аргументацией, зашедшие исходы «Экспресса дня», успешные прогнозы всех экспертов с именами и обоснованием, а в конце — краткий список мимо и возвратов, чтобы картина дня была честной и полной"
         titleId="digest-title"
       />
 
@@ -508,11 +505,12 @@ export function DigestSection() {
                   )}
                 </div>
                 <p className="text-xs leading-relaxed text-zinc-500">
-                  Одно сообщение за вчерашний день: сначала сводка «сколько зашло · мимо», затем
-                  полный разбор зашедших главных ставок — «Ставка дня» со счётом и всей
+                  Одно сообщение за вчерашний день: сначала сводка «сколько зашло · мимо ·
+                  возвратов», затем полный разбор зашедших — «Ставка дня» со счётом и всей
                   аргументацией, зашедшие исходы «Экспресса дня» с разбором «почему» у каждой
-                  ноги и прогноз эксперта целиком. Если текст длиннее лимита Telegram — придёт
-                  несколькими частями. Проигравшие и прочая лента не разбираются.
+                  ноги, успешные прогнозы всех экспертов — с именем аналитика и обоснованием.
+                  В конце — краткий список не зашедших и возвратов. Если текст длиннее лимита
+                  Telegram — придёт несколькими частями.
                 </p>
 
                 <div className="grid gap-4 lg:grid-cols-[1.12fr_0.88fr]">
@@ -545,14 +543,20 @@ export function DigestSection() {
                       </div>
                     )}
 
-                    {wonStarPicks.length > 0 && starSportLabel && (
+                    {expertWinList.length > 0 && (
                       <div>
                         <p className="mb-2 text-xs font-bold tracking-[0.18em] text-amber-600 uppercase">
-                          {starSportLabel} — зашло
+                          Успешные прогнозы экспертов — {expertWinList.length}
                         </p>
                         <ul className="flex flex-col gap-2.5">
-                          {wonStarPicks.map((p) => (
-                            <PickRow key={p.id} pick={p} accent="star" whyLabel="Разбор ставки" />
+                          {expertWinList.map((p) => (
+                            <PickRow
+                              key={p.id}
+                              pick={p}
+                              accent="star"
+                              whyLabel="Разбор ставки"
+                              who={p.tipsterName}
+                            />
                           ))}
                         </ul>
                       </div>
@@ -627,14 +631,43 @@ export function DigestSection() {
                         </li>
                         <li className="flex items-center gap-2">
                           <Star className="size-3.5 shrink-0 text-amber-600" aria-hidden />
-                          Прогноз эксперта — если зашёл
+                          Успешные прогнозы всех экспертов — с именами
                         </li>
-                        <li className="flex items-center gap-2 text-zinc-400">
+                        <li className="flex items-center gap-2 text-zinc-500">
                           <MinusCircle className="size-3.5 shrink-0" aria-hidden />
-                          Проигравшие — не разбираем
+                          Мимо и возвраты — кратким списком в конце
                         </li>
                       </ul>
                     </div>
+
+                    {/* Честная картина: мимо и возвраты вчерашнего дня */}
+                    {missList.length > 0 && (
+                      <div className="rounded-xl border border-zinc-100 bg-white p-3.5">
+                        <p className="text-xs font-bold tracking-[0.18em] text-zinc-400 uppercase">
+                          Мимо и возвраты — {missList.length}
+                        </p>
+                        <ul className="mt-2.5 flex max-h-44 flex-col gap-1.5 overflow-y-auto text-xs text-zinc-600">
+                          {missList.map((p) => (
+                            <li key={p.id} className="flex items-start gap-1.5">
+                              <span aria-hidden className="mt-0.5 shrink-0 text-zinc-400">•</span>
+                              <span className="min-w-0">
+                                {p.tipsterName && (
+                                  <span className="font-semibold text-zinc-700">{p.tipsterName}: </span>
+                                )}
+                                {p.homeTeam} — {p.awayTeam} · {p.selection.split('—')[0].trim()} @
+                                {p.odds.toFixed(2)} —{' '}
+                                <span className={p.status === 'lost' ? 'text-rose-600' : 'text-zinc-500'}>
+                                  {p.status === 'lost' ? 'мимо' : 'возврат'}
+                                </span>
+                                {p.score && (
+                                  <span className="font-mono text-[11px] text-zinc-500"> · {p.score}</span>
+                                )}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
 
                     {/* Предпросмотр сообщения */}
                     <div className="rounded-xl border border-zinc-100">

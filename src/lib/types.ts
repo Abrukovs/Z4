@@ -421,6 +421,12 @@ export interface DigestDataDto {
   betOfDay: DigestPickDto[]
   express: DigestExpressDto | null
   star: { tipsterName: string; tipsterRole: string; sport: string; picks: DigestPickDto[] } | null
+  /** Зашедшие прогнозы ВСЕХ экспертов (вкл. звезду), не СД/не ноги экспресса */
+  expertWins: DigestPickDto[]
+  /** Прочие зашедшие исходы ленты (без эксперта) */
+  otherWins: DigestPickDto[]
+  /** Рассчитанные не зашедшие (мимо + возвраты) — краткий блок честности */
+  misses: DigestPickDto[]
   summary: DigestSummaryDto
 }
 
