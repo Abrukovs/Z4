@@ -1,3 +1,4 @@
+import { mskDayKey } from '@/lib/format'
 import type { Bet, Tipster } from '@prisma/client'
 import type { BetStatus } from '@/lib/types'
 
@@ -34,16 +35,15 @@ export interface ExpressDaysResult {
   totals: ExpressDaysTotals
 }
 
-function startOfDay(d: Date): Date {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate())
-}
-
 function round2(v: number): number {
   return Math.round(v * 100) / 100
 }
 
-const dayKey = (d: Date) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+// Московские сутки (баг 25.10 «экспресс субботы не зашёл»): дни
+// группируются по МСК-календарю — матчи 00:00–03:00 МСК принадлежат
+// своему дню, а не прилипают к прошлому (Бостон 02:00 МСК уезжал из
+// субботы в пятницу, теряя ноги субботнего экспресса).
+const dayKey = (d: Date) => mskDayKey(d)
 
 /**
  * Ретроспектива «Экспресса дня»: топ-3 пика дня по уверенности (без ставки
@@ -60,7 +60,7 @@ export function computeExpressDays(bets: BetWithTipster[]): ExpressDaysResult {
   const byDay = new Map<string, BetWithTipster[]>()
   for (const b of bets) {
     if (b.isBetOfDay) continue
-    const key = dayKey(startOfDay(b.matchDate))
+    const key = dayKey(b.matchDate)
     const list = byDay.get(key)
     if (list) list.push(b)
     else byDay.set(key, [b])
@@ -71,7 +71,16 @@ export function computeExpressDays(bets: BetWithTipster[]): ExpressDaysResult {
   const totals: ExpressDaysTotals = { won: 0, lost: 0, void: 0, pending: 0, profit: 0 }
 
   for (const [key, dayBets] of dayEntries) {
-    const legs = [...dayBets].sort((a, b) => b.confidence - a.confidence).slice(0, 3)
+    // Тай-брейк при равной уверенности — БОЛЕЕ РАННИЙ матч (как в живом
+    // /api/express и в buildExpressOfDay дайджеста): вердикты и составы
+    // ног везде совпадают (баг 25.10: карточка брала одни «75-е» ноги,
+    // дайджест — другие, экспресс «выглядел» по-разному в разных местах).
+    const legs = [...dayBets]
+      .sort(
+        (a, b) =>
+          b.confidence - a.confidence || a.matchDate.getTime() - b.matchDate.getTime(),
+      )
+      .slice(0, 3)
     if (legs.length < 2) continue // экспресс собирается минимум из 2 ног
     const totalOdds = round2(legs.reduce((p, l) => p * l.odds, 1))
     if (legs.some((l) => l.status === 'pending')) {

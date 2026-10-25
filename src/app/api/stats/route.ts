@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { mskStartOfDay } from '@/lib/format'
 import { ensureFreshData, maintenanceTick } from '@/lib/seed'
 import { computeExpressDays } from '@/lib/express-history'
 import { SPORT_KEYS, type SportKey } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
+// Московские сутки (баг 25.10): было UTC-полночь — матчи 00:00–03:00 МСК
+// прилипали к прошлому дню. Подробности — в mskStartOfDay (@/lib/format).
 function startOfDay(d: Date): Date {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate())
+  return mskStartOfDay(d)
 }
 
 function round2(v: number): number {

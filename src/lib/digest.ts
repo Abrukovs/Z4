@@ -137,12 +137,16 @@ export interface TelegramChatOption {
 
 /* --------------------------- Дата (МСК) --------------------------- */
 
-/** Московское «сегодня» со сдвигом: offsetDays=1 → вчерашний день разбора */
+/** Московское «сегодня» со сдвигом: offsetDays=1 → вчерашний день разбора.
+ *  Границы — РОВНО полночь МСК (баг 25.10: раньше окно было [00:00 UTC …),
+ *  т.е. 03:00–03:00 МСК — матчи 00:00–03:00 МСК прилипали к прошлому дню:
+ *  Бостон 02:00 МСК попадал в «разбор за пятницу», итоги субботы
+ *  уезжали в пятничное сообщение). */
 function mskDayWindow(offsetDays: number): { startUtc: Date; endUtc: Date; dateKey: string } {
-  const mskMs = Date.now() + MSK_OFFSET_MS - offsetDays * 24 * 60 * 60 * 1000
-  const startUtc = new Date(mskMs)
-  startUtc.setUTCHours(0, 0, 0, 0)
-  const endUtc = new Date(startUtc.getTime() + 24 * 60 * 60 * 1000)
+  const mskNowMs = Date.now() + MSK_OFFSET_MS - offsetDays * 24 * 60 * 60 * 1000
+  const mskMidnightMs = Math.floor(mskNowMs / 86400e3) * 86400e3
+  const startUtc = new Date(mskMidnightMs - MSK_OFFSET_MS)
+  const endUtc = new Date(mskMidnightMs + 24 * 60 * 60 * 1000 - MSK_OFFSET_MS)
   const dateKey = mskDateKeyOf(startUtc)
   return { startUtc, endUtc, dateKey }
 }

@@ -8,6 +8,27 @@ import type { BetStatus } from '@/lib/types'
 
 const MSK_TZ = 'Europe/Moscow'
 
+/** Сдвиг МСК от UTC в миллисекундах (в Москве нет сезонных переводов) */
+export const MSK_OFFSET_MS = 3 * 60 * 60 * 1000
+
+/**
+ * Полночь МОСКОВСКИХ суток. Баг 25.10 («экспресс субботы не зашёл»):
+ * границы «дня» везде были UTC-полуночью — матчи 00:00–03:00 МСК
+ * прилипали к прошлому дню (Бостон 02:00 МСК уезжал в пятничный разбор,
+ * экспресс субботы «терял» ноги). Единая точка правды для всех окон.
+ */
+export function mskStartOfDay(d = new Date()): Date {
+  return new Date(
+    Math.floor((d.getTime() + MSK_OFFSET_MS) / 86400e3) * 86400e3 - MSK_OFFSET_MS,
+  )
+}
+
+/** Ключ московских суток «YYYY-MM-DD» (для группировки дней по МСК) */
+export function mskDayKey(d = new Date()): string {
+  const msk = new Date(d.getTime() + MSK_OFFSET_MS)
+  return `${msk.getUTCFullYear()}-${String(msk.getUTCMonth() + 1).padStart(2, '0')}-${String(msk.getUTCDate()).padStart(2, '0')}`
+}
+
 const MONTHS_FULL = [
   'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
   'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря',

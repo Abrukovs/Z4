@@ -16,6 +16,7 @@ import { recomputeTipsterCounters } from './tipster-counters'
 import { isBodEligible, TENNIS_LOW_RE, TENNIS_LOW_PENALTY } from './bod-rules'
 import { hasForeignGlitch } from './llm'
 import { parseStarLogic } from './star-logic'
+import { mskStartOfDay } from '@/lib/format'
 import type { RealMatchDto, RealMatchesData, SportKey, StarLogic } from '@/lib/types'
 
 /**
@@ -59,7 +60,10 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
 }
 
 function startOfLocalDay(d = new Date()): Date {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate())
+  // Московские сутки (баг 25.10 «экспресс субботы»): было UTC-полночь.
+  // Теперь окна «сегодня» (генерация, ретро-дни СД, дубли-защита) — по МСК:
+  // матчи 00:00–03:00 МСК принадлежат своему календарному дню.
+  return mskStartOfDay(d)
 }
 
 const SPORT_LABEL: Record<SportKey, string> = {

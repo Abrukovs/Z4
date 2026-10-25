@@ -1,4 +1,5 @@
 import { db } from '@/lib/db'
+import { mskStartOfDay } from '@/lib/format'
 import { backfillBetOfDayFlags, ensureRealBets, forceGenerateRealBets } from '@/lib/real-bets'
 import { isBodEligible } from '@/lib/bod-rules'
 import { recomputeTipsterCounters } from '@/lib/tipster-counters'
@@ -14,8 +15,10 @@ import { restoreHistoryFromArchive, syncBetArchive } from '@/lib/bet-history'
  * выдуманных событий, «виртуального времени» и демо-истории ликвидированы.
  */
 
+// Московские сутки (баг 25.10): было UTC-полночь — матчи 00:00–03:00 МСК
+// прилипали к прошлому дню. Подробности — в mskStartOfDay (@/lib/format).
 function startOfDay(d: Date): Date {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate())
+  return mskStartOfDay(d)
 }
 
 /** Ростер аналитиков: каждый специализируется на своём виде спорта */

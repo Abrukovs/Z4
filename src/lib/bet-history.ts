@@ -212,19 +212,15 @@ export async function syncBetArchive(force = false): Promise<void> {
 
 /* ----------------------------- восстановление ------------------------ */
 
-const RESTORE_VOID_NOTE =
-  'Восстановлено из вечного архива: сервер платформы перезагрузился до расчёта матча, итог не сохранился — возврат (на статистику не влияет)'
-
-function startOfLocalDay(d = new Date()): Date {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate())
-}
-
 /**
  * Архив → БД. Выполняется один раз за процесс (при первом визите после
  * сброса): вставляет утерянные прогнозы, актуализирует статусы.
- * Прошедшие ставки со статусом pending (сброс оборвал расчёт) получают
- * честный возврат с пояснением — они остаются видимыми в карточках
- * экспертов, но не портят статистику.
+ *
+ * Баг 25.10 (жалоба «экспресс субботы не зашёл»): restore раньше сам
+ * воидил «прошедшие» pending по границе UTC-суток — при скачке часов
+ * платформы это превращало ЕЩЁ НЕ СЫГРАННЫЕ матчи в возвраты. Теперь
+ * restore ТОЛЬКО переносит данные из архива как есть; итоги считает
+ * исключительно resolveRealBets — по реальным счётам источника.
  */
 export async function restoreHistoryFromArchive(): Promise<number> {
   if (restoreDone) return 0
@@ -242,7 +238,6 @@ export async function restoreHistoryFromArchive(): Promise<number> {
     const tipsterByName = new Map(tipsters.map((t) => [t.name, t.id]))
     const dbIds = new Set(existing.map((b) => b.id))
 
-    const todayStart = startOfLocalDay()
     let inserted = 0
     let updated = 0
 
@@ -253,14 +248,15 @@ export async function restoreHistoryFromArchive(): Promise<number> {
       // Уже есть в БД и архив не новее — пропускаем
       if (exists && new Date(ab.updatedAt) <= exists) continue
 
-      // Прошедший матч, завис в pending (сброс оборвал расчёт) —
-      // честный возврат, запись остаётся в истории эксперта
-      let status = ab.status
-      let resultNote = ab.resultNote
-      if (status === 'pending' && matchDate < todayStart) {
-        status = 'void'
-        resultNote = RESTORE_VOID_NOTE
-      }
+      // ВАЖНО (баг 25.10): restore НИКОГДА не «изобретает» возвраты для
+      // прошедших pending. Итогами занимается только resolveRealBets — он
+      // считает по реальным счётам (страница той даты → веб-поиск →
+      // честный возврат, если счёта нет нигде). Раньше restore сам воидил
+      // «прошедшие» матчи по границе UTC-суток — при скачке часов платформы
+      // это превращало ЕЩЁ НЕ СЫГРАННЫЕ матчи субботы в «возвраты», и
+      // экспресс субботы показывался «не зашёл» (жалоба владельца).
+      const status = ab.status
+      const resultNote = ab.resultNote
 
       const data = {
         id: ab.id,
