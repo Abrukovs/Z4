@@ -1,7 +1,6 @@
 {
  "version": 1,
-<<<<<<< HEAD
- "updatedAt": "2026-10-25T13:48:38.156Z",
+ "updatedAt": "2026-10-25T13:51:52.354Z",
  "bets": [
   {
    "id": "cmvnuj8ub000lswvcpmoofkpt",
@@ -24,36 +23,10 @@
    "marketOdds": null,
    "marketSource": null,
    "marketNote": null,
-   "marketCheckedAt": null,
+   "marketCheckedAt": "2026-10-25T13:49:36.812Z",
    "tipsterName": "Дмитрий Орлов",
    "createdAt": "2026-10-25T13:11:10.979Z",
-   "updatedAt": "2026-10-25T13:11:10.979Z"
-  },
-  {
-   "id": "cmvnuj3zi000fswvc1yhzioew",
-   "sport": "hockey",
-   "league": "Германия. Бундеслига 1",
-   "homeTeam": "Аугсбург",
-   "awayTeam": "Штраубинг",
-   "matchDate": "2026-10-25T15:30:00.000Z",
-   "market": "Исход матча",
-   "selection": "П1 — победа хозяев",
-   "odds": 2.1,
-   "stake": 3,
-   "confidence": 60,
-   "analysis": "Аугсбург играет на своем льду и имеет мотивацию после нескольких неудачных игр. Штраубинг — середняк таблицы, который не отличается стабильностью. Хозяева имеют небольшое преимущество в данном противостоянии.",
-   "status": "pending",
-   "resultNote": null,
-   "isRealMatch": true,
-   "isBetOfDay": false,
-   "starLogic": null,
-   "marketOdds": null,
-   "marketSource": null,
-   "marketNote": null,
-   "marketCheckedAt": null,
-   "tipsterName": "Игорь Морозов",
-   "createdAt": "2026-10-25T13:11:04.686Z",
-   "updatedAt": "2026-10-25T13:11:04.686Z"
+   "updatedAt": "2026-10-25T13:49:36.813Z"
   },
   {
    "id": "cmvnuj3zk000hswvcnat5rctt",
@@ -73,13 +46,39 @@
    "isRealMatch": true,
    "isBetOfDay": false,
    "starLogic": null,
-   "marketOdds": null,
-   "marketSource": null,
-   "marketNote": null,
-   "marketCheckedAt": null,
+   "marketOdds": 1.75,
+   "marketSource": "stavka.tv",
+   "marketNote": "Наш кэф 1.85 выше линии рынка (1.75 по данным stavka.tv) — есть запас ценности.",
+   "marketCheckedAt": "2026-10-25T13:48:45.243Z",
    "tipsterName": "Игорь Морозов",
    "createdAt": "2026-10-25T13:11:04.688Z",
-   "updatedAt": "2026-10-25T13:11:04.688Z"
+   "updatedAt": "2026-10-25T13:48:45.244Z"
+  },
+  {
+   "id": "cmvnuj3zi000fswvc1yhzioew",
+   "sport": "hockey",
+   "league": "Германия. Бундеслига 1",
+   "homeTeam": "Аугсбург",
+   "awayTeam": "Штраубинг",
+   "matchDate": "2026-10-25T15:30:00.000Z",
+   "market": "Исход матча",
+   "selection": "П1 — победа хозяев",
+   "odds": 2.1,
+   "stake": 3,
+   "confidence": 60,
+   "analysis": "Аугсбург играет на своем льду и имеет мотивацию после нескольких неудачных игр. Штраубинг — середняк таблицы, который не отличается стабильностью. Хозяева имеют небольшое преимущество в данном противостоянии.",
+   "status": "pending",
+   "resultNote": null,
+   "isRealMatch": true,
+   "isBetOfDay": false,
+   "starLogic": null,
+   "marketOdds": 2.5,
+   "marketSource": "fonbet.by",
+   "marketNote": "Наш кэф 2.10 ниже линии рынка (2.50 по данным fonbet.by) — кэф у книг теснее нашего.",
+   "marketCheckedAt": "2026-10-25T13:48:42.564Z",
+   "tipsterName": "Игорь Морозов",
+   "createdAt": "2026-10-25T13:11:04.686Z",
+   "updatedAt": "2026-10-25T13:48:42.565Z"
   },
   {
    "id": "cmvnuj3zl000jswvc826bbe0e",
@@ -108,108 +107,30 @@
    "updatedAt": "2026-10-25T13:28:41.745Z"
   },
   {
-   "id": "cmvnuj3z90007swvcqgpwm2nc",
+   "id": "cmvnuj8uf000pswvc6spo8nhw",
    "sport": "football",
-   "league": "Чемпионат Англии. Премьер-лига",
-   "homeTeam": "Кристал Пэлас",
-   "awayTeam": "Ньюкасл Юнайтед",
-   "matchDate": "2026-10-25T14:00:00.000Z",
-   "market": "Исход матча (1X2)",
-   "selection": "П2 — победа гостей",
-   "odds": 1.95,
-   "stake": 7,
-   "confidence": 78,
-   "analysis": "Ньюкасл в отличной форме, демонстрирует мощную игру в обороне и атаке. Кристал Пэлас испытывает трудности, особенно в домашних матчах. Гости явные фавориты в этой встрече.",
-   "status": "pending",
-   "resultNote": null,
-   "isRealMatch": true,
-   "isBetOfDay": false,
-   "starLogic": null,
-   "marketOdds": 2.35,
-   "marketSource": "www.sport-express.net",
-   "marketNote": "Наш кэф 1.95 ниже линии рынка (2.35 по данным www.sport-express.net) — кэф у книг теснее нашего.",
-   "marketCheckedAt": "2026-10-25T13:45:47.511Z",
-   "tipsterName": "Алексей Соколов",
-   "createdAt": "2026-10-25T13:11:04.678Z",
-   "updatedAt": "2026-10-25T13:45:47.513Z"
-  },
-  {
-   "id": "cmvnuj3zb0009swvcnhsyf1wr",
-   "sport": "football",
-   "league": "Чемпионат Англии. Премьер-лига",
-   "homeTeam": "Халл Сити",
-   "awayTeam": "Брентфорд",
+   "league": "Чемпионат Италии. Серия А",
+   "homeTeam": "Дженоа",
+   "awayTeam": "Венеция",
    "matchDate": "2026-10-25T14:00:00.000Z",
    "market": "Тотал голов",
    "selection": "ТБ 2.5 — тотал больше 2.5 голов",
-   "odds": 1.8,
-   "stake": 6,
-   "confidence": 75,
-   "analysis": "Обе команды любят атакующий футбол и пропускают много голов. Брентфорд забивает в каждом матче, а Халл Сити в последних играх также показывал открытый футбол. Ожидаем результативную игру.",
-   "status": "pending",
-   "resultNote": null,
-   "isRealMatch": true,
-   "isBetOfDay": false,
-   "starLogic": null,
-   "marketOdds": 1.68,
-   "marketSource": "scores24.live",
-   "marketNote": "Наш кэф 1.80 выше линии рынка (1.68 по данным scores24.live) — есть запас ценности.",
-   "marketCheckedAt": "2026-10-25T13:45:52.053Z",
-   "tipsterName": "Алексей Соколов",
-   "createdAt": "2026-10-25T13:11:04.680Z",
-   "updatedAt": "2026-10-25T13:45:52.055Z"
-  },
-  {
-   "id": "cmvnuj3zd000bswvcgo8o1s4t",
-   "sport": "football",
-   "league": "Чемпионат Англии. Премьер-лига",
-   "homeTeam": "Ливерпуль",
-   "awayTeam": "Брайтон",
-   "matchDate": "2026-10-25T14:00:00.000Z",
-   "market": "Исход матча (1X2)",
-   "selection": "П1 — победа хозяев",
-   "odds": 1.65,
-   "stake": 5,
-   "confidence": 70,
-   "analysis": "Ливерпуль на своем поле — это серьезная сила, даже при ротации состава. Брайтон обычно играет осторожно против топ-клубов, что может привести к малому числу моментов. Хозяева должны победить.",
-   "status": "pending",
-   "resultNote": null,
-   "isRealMatch": true,
-   "isBetOfDay": false,
-   "starLogic": null,
-   "marketOdds": 2.12,
-   "marketSource": "bookmaker-ratings.ru",
-   "marketNote": "Наш кэф 1.65 ниже линии рынка (2.12 по данным bookmaker-ratings.ru) — кэф у книг теснее нашего.",
-   "marketCheckedAt": "2026-10-25T13:47:42.437Z",
-   "tipsterName": "Алексей Соколов",
-   "createdAt": "2026-10-25T13:11:04.682Z",
-   "updatedAt": "2026-10-25T13:47:42.439Z"
-  },
-  {
-   "id": "cmvnuj3zg000dswvc6zr379j0",
-   "sport": "football",
-   "league": "Чемпионат Англии. Премьер-лига",
-   "homeTeam": "Ман. Юнайтед",
-   "awayTeam": "Борнмут",
-   "matchDate": "2026-10-25T14:00:00.000Z",
-   "market": "Тотал голов",
-   "selection": "ТМ 2.5 — тотал меньше 2.5 голов",
    "odds": 1.9,
    "stake": 4,
-   "confidence": 65,
-   "analysis": "Манчестер Юнайтед играет неуверенно в атаке под руководством Рашфорда. Борнмут — не тот соперник, который будет рисковать в выездном матче против топ-клуба. Ждем закрытый футбол с минимумом голов.",
+   "confidence": 68,
+   "analysis": "Дженоа в этом сезоне играет очень открыто, особенно на своем поле. Венеция также не отличается надежной игрой в обороне. Обе команды пропускают много, поэтому ждем от них голов и в этом матче.",
    "status": "pending",
    "resultNote": null,
    "isRealMatch": true,
    "isBetOfDay": false,
    "starLogic": null,
-   "marketOdds": 2.5,
+   "marketOdds": 1.9,
    "marketSource": "www.soccer.ru",
-   "marketNote": "Наш кэф 1.90 ниже линии рынка (2.50 по данным www.soccer.ru) — кэф у книг теснее нашего.",
-   "marketCheckedAt": "2026-10-25T13:47:49.202Z",
+   "marketNote": "Наш кэф 1.90 практически совпадает с линией рынка (1.90 по данным www.soccer.ru).",
+   "marketCheckedAt": "2026-10-25T13:48:38.056Z",
    "tipsterName": "Алексей Соколов",
-   "createdAt": "2026-10-25T13:11:04.684Z",
-   "updatedAt": "2026-10-25T13:47:49.203Z"
+   "createdAt": "2026-10-25T13:11:10.983Z",
+   "updatedAt": "2026-10-25T13:48:38.057Z"
   },
   {
    "id": "cmvnuj8ud000nswvcmy97pfy3",
@@ -238,73 +159,108 @@
    "updatedAt": "2026-10-25T13:48:34.957Z"
   },
   {
-   "id": "cmvnuj8uf000pswvc6spo8nhw",
+   "id": "cmvnuj3zg000dswvc6zr379j0",
    "sport": "football",
-   "league": "Чемпионат Италии. Серия А",
-   "homeTeam": "Дженоа",
-   "awayTeam": "Венеция",
+   "league": "Чемпионат Англии. Премьер-лига",
+   "homeTeam": "Ман. Юнайтед",
+   "awayTeam": "Борнмут",
+   "matchDate": "2026-10-25T14:00:00.000Z",
+   "market": "Тотал голов",
+   "selection": "ТМ 2.5 — тотал меньше 2.5 голов",
+   "odds": 1.9,
+   "stake": 4,
+   "confidence": 65,
+   "analysis": "Манчестер Юнайтед играет неуверенно в атаке под руководством Рашфорда. Борнмут — не тот соперник, который будет рисковать в выездном матче против топ-клуба. Ждем закрытый футбол с минимумом голов.",
+   "status": "pending",
+   "resultNote": null,
+   "isRealMatch": true,
+   "isBetOfDay": false,
+   "starLogic": null,
+   "marketOdds": 2.5,
+   "marketSource": "www.soccer.ru",
+   "marketNote": "Наш кэф 1.90 ниже линии рынка (2.50 по данным www.soccer.ru) — кэф у книг теснее нашего.",
+   "marketCheckedAt": "2026-10-25T13:47:49.202Z",
+   "tipsterName": "Алексей Соколов",
+   "createdAt": "2026-10-25T13:11:04.684Z",
+   "updatedAt": "2026-10-25T13:47:49.203Z"
+  },
+  {
+   "id": "cmvnuj3zd000bswvcgo8o1s4t",
+   "sport": "football",
+   "league": "Чемпионат Англии. Премьер-лига",
+   "homeTeam": "Ливерпуль",
+   "awayTeam": "Брайтон",
+   "matchDate": "2026-10-25T14:00:00.000Z",
+   "market": "Исход матча (1X2)",
+   "selection": "П1 — победа хозяев",
+   "odds": 1.65,
+   "stake": 5,
+   "confidence": 70,
+   "analysis": "Ливерпуль на своем поле — это серьезная сила, даже при ротации состава. Брайтон обычно играет осторожно против топ-клубов, что может привести к малому числу моментов. Хозяева должны победить.",
+   "status": "pending",
+   "resultNote": null,
+   "isRealMatch": true,
+   "isBetOfDay": false,
+   "starLogic": null,
+   "marketOdds": 2.12,
+   "marketSource": "bookmaker-ratings.ru",
+   "marketNote": "Наш кэф 1.65 ниже линии рынка (2.12 по данным bookmaker-ratings.ru) — кэф у книг теснее нашего.",
+   "marketCheckedAt": "2026-10-25T13:47:42.437Z",
+   "tipsterName": "Алексей Соколов",
+   "createdAt": "2026-10-25T13:11:04.682Z",
+   "updatedAt": "2026-10-25T13:47:42.439Z"
+  },
+  {
+   "id": "cmvnuj3zb0009swvcnhsyf1wr",
+   "sport": "football",
+   "league": "Чемпионат Англии. Премьер-лига",
+   "homeTeam": "Халл Сити",
+   "awayTeam": "Брентфорд",
    "matchDate": "2026-10-25T14:00:00.000Z",
    "market": "Тотал голов",
    "selection": "ТБ 2.5 — тотал больше 2.5 голов",
-   "odds": 1.9,
-   "stake": 4,
-   "confidence": 68,
-   "analysis": "Дженоа в этом сезоне играет очень открыто, особенно на своем поле. Венеция также не отличается надежной игрой в обороне. Обе команды пропускают много, поэтому ждем от них голов и в этом матче.",
+   "odds": 1.8,
+   "stake": 6,
+   "confidence": 75,
+   "analysis": "Обе команды любят атакующий футбол и пропускают много голов. Брентфорд забивает в каждом матче, а Халл Сити в последних играх также показывал открытый футбол. Ожидаем результативную игру.",
    "status": "pending",
    "resultNote": null,
    "isRealMatch": true,
    "isBetOfDay": false,
    "starLogic": null,
-   "marketOdds": 1.9,
-   "marketSource": "www.soccer.ru",
-   "marketNote": "Наш кэф 1.90 практически совпадает с линией рынка (1.90 по данным www.soccer.ru).",
-   "marketCheckedAt": "2026-10-25T13:48:38.056Z",
+   "marketOdds": 1.68,
+   "marketSource": "scores24.live",
+   "marketNote": "Наш кэф 1.80 выше линии рынка (1.68 по данным scores24.live) — есть запас ценности.",
+   "marketCheckedAt": "2026-10-25T13:45:52.053Z",
    "tipsterName": "Алексей Соколов",
-   "createdAt": "2026-10-25T13:11:10.983Z",
-   "updatedAt": "2026-10-25T13:48:38.057Z"
+   "createdAt": "2026-10-25T13:11:04.680Z",
+   "updatedAt": "2026-10-25T13:45:52.055Z"
   },
   {
-=======
- "updatedAt": "2026-10-24T06:42:39.223Z",
- "bets": [
-  {
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
-   "id": "cmvm0imod000kpzu07hto7kf9",
+   "id": "cmvnuj3z90007swvcqgpwm2nc",
    "sport": "football",
    "league": "Чемпионат Англии. Премьер-лига",
-   "homeTeam": "Челси",
-   "awayTeam": "Тоттенхэм",
-   "matchDate": "2026-10-24T16:30:00.000Z",
+   "homeTeam": "Кристал Пэлас",
+   "awayTeam": "Ньюкасл Юнайтед",
+   "matchDate": "2026-10-25T14:00:00.000Z",
    "market": "Исход матча (1X2)",
-   "selection": "Ничья (Х)",
-   "odds": 3.4,
-   "stake": 4,
-   "confidence": 60,
-   "analysis": "Челси и Тоттенхэм — принципиальные соперники. Матч будет напряженным и осторожным. Обе команды не будут рисковать, что может привести к низкому результативному draws.",
-<<<<<<< HEAD
-   "status": "lost",
-   "resultNote": "Реальный счёт 0:2 — прогноз не сыграл",
-=======
+   "selection": "П2 — победа гостей",
+   "odds": 1.95,
+   "stake": 7,
+   "confidence": 78,
+   "analysis": "Ньюкасл в отличной форме, демонстрирует мощную игру в обороне и атаке. Кристал Пэлас испытывает трудности, особенно в домашних матчах. Гости явные фавориты в этой встрече.",
    "status": "pending",
    "resultNote": null,
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
    "isRealMatch": true,
    "isBetOfDay": false,
    "starLogic": null,
-   "marketOdds": null,
-   "marketSource": null,
-   "marketNote": null,
-<<<<<<< HEAD
-   "marketCheckedAt": "2026-10-24T07:16:29.535Z",
+   "marketOdds": 2.35,
+   "marketSource": "www.sport-express.net",
+   "marketNote": "Наш кэф 1.95 ниже линии рынка (2.35 по данным www.sport-express.net) — кэф у книг теснее нашего.",
+   "marketCheckedAt": "2026-10-25T13:45:47.511Z",
    "tipsterName": "Алексей Соколов",
-   "createdAt": "2026-10-24T06:23:07.597Z",
-   "updatedAt": "2026-10-25T13:44:53.165Z"
-=======
-   "marketCheckedAt": null,
-   "tipsterName": "Алексей Соколов",
-   "createdAt": "2026-10-24T06:23:07.597Z",
-   "updatedAt": "2026-10-24T06:23:07.597Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
+   "createdAt": "2026-10-25T13:11:04.678Z",
+   "updatedAt": "2026-10-25T13:45:47.513Z"
   },
   {
    "id": "cmvm0imob000ipzu0g3qs9ekv",
@@ -319,7 +275,6 @@
    "stake": 7,
    "confidence": 75,
    "analysis": "Краснодар переживает не лучшие времена, травмы и потеря формы влияют на игру. Балтика, наоборот, в отличной форме и мотивирована на борьбу за выживание. Гости способны удивить.",
-<<<<<<< HEAD
    "status": "lost",
    "resultNote": "Реальный счёт 1:1 — прогноз не сыграл",
    "isRealMatch": true,
@@ -332,20 +287,32 @@
    "tipsterName": "Алексей Соколов",
    "createdAt": "2026-10-24T06:23:07.595Z",
    "updatedAt": "2026-10-25T13:44:53.162Z"
-=======
-   "status": "pending",
-   "resultNote": null,
+  },
+  {
+   "id": "cmvm0imod000kpzu07hto7kf9",
+   "sport": "football",
+   "league": "Чемпионат Англии. Премьер-лига",
+   "homeTeam": "Челси",
+   "awayTeam": "Тоттенхэм",
+   "matchDate": "2026-10-24T16:30:00.000Z",
+   "market": "Исход матча (1X2)",
+   "selection": "Ничья (Х)",
+   "odds": 3.4,
+   "stake": 4,
+   "confidence": 60,
+   "analysis": "Челси и Тоттенхэм — принципиальные соперники. Матч будет напряженным и осторожным. Обе команды не будут рисковать, что может привести к низкому результативному draws.",
+   "status": "lost",
+   "resultNote": "Реальный счёт 0:2 — прогноз не сыграл",
    "isRealMatch": true,
    "isBetOfDay": false,
    "starLogic": null,
    "marketOdds": null,
    "marketSource": null,
    "marketNote": null,
-   "marketCheckedAt": null,
+   "marketCheckedAt": "2026-10-24T07:16:29.535Z",
    "tipsterName": "Алексей Соколов",
-   "createdAt": "2026-10-24T06:23:07.595Z",
-   "updatedAt": "2026-10-24T06:23:07.595Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
+   "createdAt": "2026-10-24T06:23:07.597Z",
+   "updatedAt": "2026-10-25T13:44:53.165Z"
   },
   {
    "id": "cmvm0imo9000gpzu026va586s",
@@ -360,7 +327,6 @@
    "stake": 6,
    "confidence": 65,
    "analysis": "Рубин в хорошей форме дома и мотивирован на борьбу за еврокубки. Крылья Советов нестабильны и часто теряют очки в выездных матчах. Хозяева должны взять очки.",
-<<<<<<< HEAD
    "status": "lost",
    "resultNote": "Реальный счёт 0:2 — прогноз не сыграл",
    "isRealMatch": true,
@@ -373,61 +339,6 @@
    "tipsterName": "Алексей Соколов",
    "createdAt": "2026-10-24T06:23:07.594Z",
    "updatedAt": "2026-10-25T13:44:53.166Z"
-=======
-   "status": "pending",
-   "resultNote": null,
-   "isRealMatch": true,
-   "isBetOfDay": false,
-   "starLogic": null,
-   "marketOdds": null,
-   "marketSource": null,
-   "marketNote": null,
-   "marketCheckedAt": null,
-   "tipsterName": "Алексей Соколов",
-   "createdAt": "2026-10-24T06:23:07.594Z",
-   "updatedAt": "2026-10-24T06:23:07.594Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
-  },
-  {
-   "id": "cmvm0imo7000epzu0d80j6agd",
-   "sport": "football",
-   "league": "Чемпионат Англии. Премьер-лига",
-   "homeTeam": "Ковентри",
-   "awayTeam": "Фулхэм",
-   "matchDate": "2026-10-24T14:00:00.000Z",
-   "market": "Тотал голов",
-   "selection": "ТБ 2.5 — тотал больше 2.5 голов",
-   "odds": 1.85,
-   "stake": 5,
-   "confidence": 72,
-   "analysis": "Ковентри и Фулхэм — команды с высокой результативностью. Обе пропускают много, особенно в обороне. Ожидаем открытый футбол с голами с обеих сторон.",
-<<<<<<< HEAD
-   "status": "lost",
-   "resultNote": "Реальный счёт 0:1 — прогноз не сыграл · тотал 1 против линии 2.5",
-   "isRealMatch": true,
-   "isBetOfDay": false,
-   "starLogic": null,
-   "marketOdds": 2.5,
-   "marketSource": "www.soccer.ru",
-   "marketNote": "Наш кэф 1.85 ниже линии рынка (2.50 по данным www.soccer.ru) — кэф у книг теснее нашего.",
-   "marketCheckedAt": "2026-10-24T08:53:00.475Z",
-   "tipsterName": "Алексей Соколов",
-   "createdAt": "2026-10-24T06:23:07.592Z",
-   "updatedAt": "2026-10-25T13:44:53.168Z"
-=======
-   "status": "pending",
-   "resultNote": null,
-   "isRealMatch": true,
-   "isBetOfDay": false,
-   "starLogic": null,
-   "marketOdds": 1.75,
-   "marketSource": "bookmaker-ratings.ru",
-   "marketNote": "Наш кэф 1.85 выше линии рынка (1.75 по данным bookmaker-ratings.ru) — есть запас ценности.",
-   "marketCheckedAt": "2026-10-24T06:41:49.197Z",
-   "tipsterName": "Алексей Соколов",
-   "createdAt": "2026-10-24T06:23:07.592Z",
-   "updatedAt": "2026-10-24T06:41:49.198Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
   },
   {
    "id": "cmvlgkocq000knttlv9g7a24p",
@@ -447,7 +358,6 @@
    "isRealMatch": true,
    "isBetOfDay": false,
    "starLogic": null,
-<<<<<<< HEAD
    "marketOdds": 1.42,
    "marketSource": "www.euro-football.ru",
    "marketNote": "Наш кэф 1.60 выше линии рынка (1.42 по данным www.euro-football.ru) — есть запас ценности.",
@@ -455,15 +365,32 @@
    "tipsterName": "Алексей Соколов",
    "createdAt": "2026-10-23T21:04:50.762Z",
    "updatedAt": "2026-10-25T13:44:53.167Z"
-=======
-   "marketOdds": 1.5,
-   "marketSource": "bookmaker-ratings.ru",
-   "marketNote": "Наш кэф 1.60 выше линии рынка (1.50 по данным bookmaker-ratings.ru) — есть запас ценности.",
-   "marketCheckedAt": "2026-10-24T06:41:44.498Z",
+  },
+  {
+   "id": "cmvm0imo7000epzu0d80j6agd",
+   "sport": "football",
+   "league": "Чемпионат Англии. Премьер-лига",
+   "homeTeam": "Ковентри",
+   "awayTeam": "Фулхэм",
+   "matchDate": "2026-10-24T14:00:00.000Z",
+   "market": "Тотал голов",
+   "selection": "ТБ 2.5 — тотал больше 2.5 голов",
+   "odds": 1.85,
+   "stake": 5,
+   "confidence": 72,
+   "analysis": "Ковентри и Фулхэм — команды с высокой результативностью. Обе пропускают много, особенно в обороне. Ожидаем открытый футбол с голами с обеих сторон.",
+   "status": "lost",
+   "resultNote": "Реальный счёт 0:1 — прогноз не сыграл · тотал 1 против линии 2.5",
+   "isRealMatch": true,
+   "isBetOfDay": false,
+   "starLogic": null,
+   "marketOdds": 2.5,
+   "marketSource": "www.soccer.ru",
+   "marketNote": "Наш кэф 1.85 ниже линии рынка (2.50 по данным www.soccer.ru) — кэф у книг теснее нашего.",
+   "marketCheckedAt": "2026-10-24T08:53:00.475Z",
    "tipsterName": "Алексей Соколов",
-   "createdAt": "2026-10-23T21:04:50.762Z",
-   "updatedAt": "2026-10-24T06:41:44.499Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
+   "createdAt": "2026-10-24T06:23:07.592Z",
+   "updatedAt": "2026-10-25T13:44:53.168Z"
   },
   {
    "id": "cmvlgkoco000inttl8lqkred8",
@@ -486,17 +413,36 @@
    "marketOdds": null,
    "marketSource": null,
    "marketNote": null,
-<<<<<<< HEAD
    "marketCheckedAt": "2026-10-24T08:38:54.745Z",
    "tipsterName": "Алексей Соколов",
    "createdAt": "2026-10-23T21:04:50.760Z",
    "updatedAt": "2026-10-25T13:44:53.169Z"
-=======
-   "marketCheckedAt": "2026-10-24T06:33:36.499Z",
-   "tipsterName": "Алексей Соколов",
-   "createdAt": "2026-10-23T21:04:50.760Z",
-   "updatedAt": "2026-10-24T06:33:36.501Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
+  },
+  {
+   "id": "cmvlgkocu000onttlpqyvlhek",
+   "sport": "hockey",
+   "league": "FONBET Чемпионат КХЛ",
+   "homeTeam": "Металлург Мг",
+   "awayTeam": "Сибирь",
+   "matchDate": "2026-10-24T11:30:00.000Z",
+   "market": "Исход матча",
+   "selection": "П1 — победа хозяев",
+   "odds": 1.5,
+   "stake": 7,
+   "confidence": 75,
+   "analysis": "Металлург — лидер чемпионата, который играет на своем льду и демонстрирует великолепную игру. Сибирь — середняк, который вряд ли сможет противостоять такому классу и давлению в гостях.",
+   "status": "won",
+   "resultNote": "Реальный счёт 5:1 — прогноз сыграл",
+   "isRealMatch": true,
+   "isBetOfDay": false,
+   "starLogic": null,
+   "marketOdds": 1.94,
+   "marketSource": "stavka.tv",
+   "marketNote": "Наш кэф 1.50 ниже линии рынка (1.94 по данным stavka.tv) — кэф у книг теснее нашего.",
+   "marketCheckedAt": "2026-10-24T10:40:32.889Z",
+   "tipsterName": "Игорь Морозов",
+   "createdAt": "2026-10-23T21:04:50.766Z",
+   "updatedAt": "2026-10-25T13:47:16.468Z"
   },
   {
    "id": "cmvlgkocm000gnttl8oaque8k",
@@ -519,53 +465,10 @@
    "marketOdds": 1.62,
    "marketSource": "championat.com",
    "marketNote": "Наш кэф 1.45 ниже линии рынка (1.62 по данным championat.com) — кэф у книг теснее нашего.",
-<<<<<<< HEAD
    "marketCheckedAt": "2026-10-24T08:38:54.685Z",
    "tipsterName": "Алексей Соколов",
    "createdAt": "2026-10-23T21:04:50.759Z",
    "updatedAt": "2026-10-25T13:44:53.171Z"
-=======
-   "marketCheckedAt": "2026-10-24T06:33:42.306Z",
-   "tipsterName": "Алексей Соколов",
-   "createdAt": "2026-10-23T21:04:50.759Z",
-   "updatedAt": "2026-10-24T06:33:42.307Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
-  },
-  {
-   "id": "cmvlgkocu000onttlpqyvlhek",
-   "sport": "hockey",
-   "league": "FONBET Чемпионат КХЛ",
-   "homeTeam": "Металлург Мг",
-   "awayTeam": "Сибирь",
-   "matchDate": "2026-10-24T11:30:00.000Z",
-   "market": "Исход матча",
-   "selection": "П1 — победа хозяев",
-   "odds": 1.5,
-   "stake": 7,
-   "confidence": 75,
-   "analysis": "Металлург — лидер чемпионата, который играет на своем льду и демонстрирует великолепную игру. Сибирь — середняк, который вряд ли сможет противостоять такому классу и давлению в гостях.",
-   "status": "won",
-   "resultNote": "Реальный счёт 5:1 — прогноз сыграл",
-   "isRealMatch": true,
-   "isBetOfDay": false,
-   "starLogic": null,
-<<<<<<< HEAD
-   "marketOdds": 1.94,
-   "marketSource": "stavka.tv",
-   "marketNote": "Наш кэф 1.50 ниже линии рынка (1.94 по данным stavka.tv) — кэф у книг теснее нашего.",
-   "marketCheckedAt": "2026-10-24T10:40:32.889Z",
-   "tipsterName": "Игорь Морозов",
-   "createdAt": "2026-10-23T21:04:50.766Z",
-   "updatedAt": "2026-10-25T13:47:16.468Z"
-=======
-   "marketOdds": 1.53,
-   "marketSource": "legalbet.ru",
-   "marketNote": "Наш кэф 1.50 практически совпадает с линией рынка (1.53 по данным legalbet.ru).",
-   "marketCheckedAt": "2026-10-24T06:33:36.479Z",
-   "tipsterName": "Игорь Морозов",
-   "createdAt": "2026-10-23T21:04:50.766Z",
-   "updatedAt": "2026-10-24T06:33:36.480Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
   },
   {
    "id": "cmvlgkocv000qnttl9zmenio5",
@@ -585,7 +488,6 @@
    "isRealMatch": true,
    "isBetOfDay": true,
    "starLogic": "{\"thesis\":\"Циципас сильнее в игре с задней линии и на быстрых покрытиях, что дает ему преимущество в Алматы.\",\"factors\":[{\"title\":\"Форма и покрытие\",\"detail\":\"Циципас — топ-10 игрок, который чувствует себя уверенно на быстрых хардовых кортах, в отличие от Басилашвили, чей лучший теннис — на грунте.\",\"side\":\"pro\"},{\"title\":\"Стиль игры\",\"detail\":\"Циципас доминирует с бэкхенда и на приеме, где Басилашвили выглядит уязвимым, что позволит Стефаносу контролировать ход матча.\",\"side\":\"pro\"},{\"title\":\"История противостояний\",\"detail\":\"Хотя личные встречи могут быть равными, Циципас обычно находит ключи к игре Басилашвили на быстрых поверхностях.\",\"side\":\"pro\"},{\"title\":\"Физическая готовность\",\"detail\":\"Басилашвили известен проблемами с поддержанием формы в течение сезона, что может сказаться на выносливости в трехсетовом матче.\",\"side\":\"pro\"},{\"title\":\"Потенциальная мотивация\",\"detail\":\"Для Басилашвили турнир в Алматы — шанс проявить себя, но Циципас будет мотивирован сохранить высокий рейтинг.\",\"side\":\"con\"}],\"scenario\":\"Циципас должен сразу захватить инициативу, выиграв первый сет, и не позволить Басилашвили войти в ритч, чтобы матч не затянулся до трех сетов.\",\"risks\":\"Если Басилашвили выйдет на свой лучший уровень и начнет активно использовать форхенд, матч может затянуться, и Циципас потеряет концентрацию.\",\"alternative\":\"Победа Басилашвили — маловероятна, так как его игра не так эффективна на быстрых кортах, а Циципас просто сильнее в текущей форме.\",\"stakeLogic\":\"Ставка в 8 юнитов оправдана высоким коэффициентом и уверенностью в победе фаворита, но рисковать больше не стоит из-за непредсказуемости Басилашвили.\"}",
-<<<<<<< HEAD
    "marketOdds": 1.37,
    "marketSource": "score.ru",
    "marketNote": "Наш кэф 1.60 выше линии рынка (1.37 по данным score.ru) — есть запас ценности.",
@@ -593,15 +495,6 @@
    "tipsterName": "Мария Волкова",
    "createdAt": "2026-10-23T21:04:50.768Z",
    "updatedAt": "2026-10-25T13:47:16.467Z"
-=======
-   "marketOdds": null,
-   "marketSource": null,
-   "marketNote": null,
-   "marketCheckedAt": "2026-10-24T06:22:54.625Z",
-   "tipsterName": "Мария Волкова",
-   "createdAt": "2026-10-23T21:04:50.768Z",
-   "updatedAt": "2026-10-24T06:23:07.601Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
   },
   {
    "id": "cmvlgkock000enttldcobjit0",
@@ -624,17 +517,10 @@
    "marketOdds": 1.85,
    "marketSource": "www.soccer.ru",
    "marketNote": "Наш кэф 1.85 практически совпадает с линией рынка (1.85 по данным www.soccer.ru).",
-<<<<<<< HEAD
    "marketCheckedAt": "2026-10-24T10:40:28.853Z",
    "tipsterName": "Алексей Соколов",
    "createdAt": "2026-10-23T21:04:50.756Z",
    "updatedAt": "2026-10-25T13:44:53.174Z"
-=======
-   "marketCheckedAt": "2026-10-24T06:33:38.750Z",
-   "tipsterName": "Алексей Соколов",
-   "createdAt": "2026-10-23T21:04:50.756Z",
-   "updatedAt": "2026-10-24T06:33:38.751Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
   },
   {
    "id": "cmvlgkocs000mnttlkt9vo5lq",
@@ -660,11 +546,7 @@
    "marketCheckedAt": "2026-10-23T21:22:55.079Z",
    "tipsterName": "Дмитрий Орлов",
    "createdAt": "2026-10-23T21:04:50.764Z",
-<<<<<<< HEAD
    "updatedAt": "2026-10-25T13:47:16.468Z"
-=======
-   "updatedAt": "2026-10-24T06:37:53.179Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
   },
   {
    "id": "cmvld75w5000bnttlylft2a9q",
@@ -690,11 +572,7 @@
    "marketCheckedAt": "2026-10-23T21:04:38.721Z",
    "tipsterName": "Дмитрий Орлов",
    "createdAt": "2026-10-23T19:30:21.461Z",
-<<<<<<< HEAD
    "updatedAt": "2026-10-25T13:10:35.953Z"
-=======
-   "updatedAt": "2026-10-24T06:22:52.074Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
   },
   {
    "id": "cmvld71nf0005nttlk16ykmhd",
@@ -720,11 +598,7 @@
    "marketCheckedAt": "2026-10-23T21:22:52.621Z",
    "tipsterName": "Дмитрий Орлов",
    "createdAt": "2026-10-23T19:30:15.964Z",
-<<<<<<< HEAD
    "updatedAt": "2026-10-25T13:10:35.954Z"
-=======
-   "updatedAt": "2026-10-24T06:37:48.152Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
   },
   {
    "id": "cmvld71ni0007nttlzprqfw5z",
@@ -750,11 +624,7 @@
    "marketCheckedAt": "2026-10-23T21:16:17.036Z",
    "tipsterName": "Мария Волкова",
    "createdAt": "2026-10-23T19:30:15.966Z",
-<<<<<<< HEAD
    "updatedAt": "2026-10-25T13:10:35.956Z"
-=======
-   "updatedAt": "2026-10-24T06:22:52.076Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
   },
   {
    "id": "cmvld75w30009nttlcieb9m0k",
@@ -780,11 +650,7 @@
    "marketCheckedAt": "2026-10-23T21:16:14.551Z",
    "tipsterName": "Алексей Соколов",
    "createdAt": "2026-10-23T19:30:21.459Z",
-<<<<<<< HEAD
    "updatedAt": "2026-10-25T13:10:35.957Z"
-=======
-   "updatedAt": "2026-10-24T06:22:52.078Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
   },
   {
    "id": "cmvgpufbq000qq5vbaws866np",
@@ -810,41 +676,7 @@
    "marketCheckedAt": null,
    "tipsterName": "Мария Волкова",
    "createdAt": "2026-10-20T13:25:31.286Z",
-<<<<<<< HEAD
    "updatedAt": "2026-10-25T13:10:35.958Z"
-=======
-   "updatedAt": "2026-10-24T06:39:54.824Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
-  },
-  {
-   "id": "cmvgmu91f000dq5vb1683ng3u",
-   "sport": "football",
-   "league": "Лига чемпионов",
-   "homeTeam": "Рома",
-   "awayTeam": "Слован Бр",
-   "matchDate": "2026-10-20T19:00:00.000Z",
-   "market": "Тотал голов",
-   "selection": "ТМ 2.5 — тотал меньше 2.5 голов",
-   "odds": 1.9,
-   "stake": 7,
-   "confidence": 80,
-   "analysis": "Рома в этом сезоне играет очень прагматично, а Слован — команда, которая будет сосредоточена на обороне. Ждем осторожную тактику и минимум голов.",
-   "status": "lost",
-   "resultNote": "Реальный счёт 4:0 — прогноз не сыграл · тотал 4 против линии 2.5",
-   "isRealMatch": true,
-   "isBetOfDay": false,
-   "starLogic": null,
-   "marketOdds": 1.3,
-   "marketSource": "by.tribuna.com",
-   "marketNote": "Наш кэф 1.90 выше линии рынка (1.30 по данным by.tribuna.com) — есть запас ценности.",
-   "marketCheckedAt": "2026-10-20T13:25:13.604Z",
-   "tipsterName": "Алексей Соколов",
-   "createdAt": "2026-10-20T12:01:24.291Z",
-<<<<<<< HEAD
-   "updatedAt": "2026-10-25T13:10:35.961Z"
-=======
-   "updatedAt": "2026-10-24T06:37:25.689Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
   },
   {
    "id": "cmvgmu91d000bq5vb2dk1furb",
@@ -870,41 +702,33 @@
    "marketCheckedAt": null,
    "tipsterName": "Алексей Соколов",
    "createdAt": "2026-10-20T12:01:24.289Z",
-<<<<<<< HEAD
    "updatedAt": "2026-10-25T13:10:35.960Z"
-=======
-   "updatedAt": "2026-10-24T06:37:25.691Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
   },
   {
-   "id": "cmvgmu91j000hq5vb5q80nglu",
-   "sport": "hockey",
-   "league": "Германия. Бундеслига 1",
-   "homeTeam": "Кельн",
-   "awayTeam": "Швеннинген",
-   "matchDate": "2026-10-20T17:30:00.000Z",
-   "market": "Исход матча",
-   "selection": "П1 — победа хозяев",
-   "odds": 1.6,
-   "stake": 4,
-   "confidence": 65,
-   "analysis": "Кельн — один из лидеров чемпионата, стабильная и сильная команда. Швеннинген — середняк, который может взять очки у сильных, но на выезде будет сложно.",
-   "status": "void",
-   "resultNote": "Восстановлено из вечного архива: сервер платформы перезагрузился до расчёта матча, итог не сохранился — возврат (на статистику не влияет)",
+   "id": "cmvgmu91f000dq5vb1683ng3u",
+   "sport": "football",
+   "league": "Лига чемпионов",
+   "homeTeam": "Рома",
+   "awayTeam": "Слован Бр",
+   "matchDate": "2026-10-20T19:00:00.000Z",
+   "market": "Тотал голов",
+   "selection": "ТМ 2.5 — тотал меньше 2.5 голов",
+   "odds": 1.9,
+   "stake": 7,
+   "confidence": 80,
+   "analysis": "Рома в этом сезоне играет очень прагматично, а Слован — команда, которая будет сосредоточена на обороне. Ждем осторожную тактику и минимум голов.",
+   "status": "lost",
+   "resultNote": "Реальный счёт 4:0 — прогноз не сыграл · тотал 4 против линии 2.5",
    "isRealMatch": true,
    "isBetOfDay": false,
    "starLogic": null,
-   "marketOdds": null,
-   "marketSource": null,
-   "marketNote": null,
-   "marketCheckedAt": null,
-   "tipsterName": "Игорь Морозов",
-   "createdAt": "2026-10-20T12:01:24.296Z",
-<<<<<<< HEAD
-   "updatedAt": "2026-10-25T13:10:35.974Z"
-=======
-   "updatedAt": "2026-10-24T06:22:52.083Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
+   "marketOdds": 1.3,
+   "marketSource": "by.tribuna.com",
+   "marketNote": "Наш кэф 1.90 выше линии рынка (1.30 по данным by.tribuna.com) — есть запас ценности.",
+   "marketCheckedAt": "2026-10-20T13:25:13.604Z",
+   "tipsterName": "Алексей Соколов",
+   "createdAt": "2026-10-20T12:01:24.291Z",
+   "updatedAt": "2026-10-25T13:10:35.961Z"
   },
   {
    "id": "cmvgmu91h000fq5vbmvdn9pm6",
@@ -930,11 +754,33 @@
    "marketCheckedAt": null,
    "tipsterName": "Игорь Морозов",
    "createdAt": "2026-10-20T12:01:24.293Z",
-<<<<<<< HEAD
    "updatedAt": "2026-10-25T13:10:35.972Z"
-=======
-   "updatedAt": "2026-10-24T06:37:25.686Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
+  },
+  {
+   "id": "cmvgmu91j000hq5vb5q80nglu",
+   "sport": "hockey",
+   "league": "Германия. Бундеслига 1",
+   "homeTeam": "Кельн",
+   "awayTeam": "Швеннинген",
+   "matchDate": "2026-10-20T17:30:00.000Z",
+   "market": "Исход матча",
+   "selection": "П1 — победа хозяев",
+   "odds": 1.6,
+   "stake": 4,
+   "confidence": 65,
+   "analysis": "Кельн — один из лидеров чемпионата, стабильная и сильная команда. Швеннинген — середняк, который может взять очки у сильных, но на выезде будет сложно.",
+   "status": "void",
+   "resultNote": "Восстановлено из вечного архива: сервер платформы перезагрузился до расчёта матча, итог не сохранился — возврат (на статистику не влияет)",
+   "isRealMatch": true,
+   "isBetOfDay": false,
+   "starLogic": null,
+   "marketOdds": null,
+   "marketSource": null,
+   "marketNote": null,
+   "marketCheckedAt": null,
+   "tipsterName": "Игорь Морозов",
+   "createdAt": "2026-10-20T12:01:24.296Z",
+   "updatedAt": "2026-10-25T13:10:35.974Z"
   },
   {
    "id": "cmvgmuh8a000nq5vb525gqzv1",
@@ -960,41 +806,7 @@
    "marketCheckedAt": null,
    "tipsterName": "Дмитрий Орлов",
    "createdAt": "2026-10-20T12:01:34.907Z",
-<<<<<<< HEAD
    "updatedAt": "2026-10-25T13:10:35.975Z"
-=======
-   "updatedAt": "2026-10-24T06:39:54.820Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
-  },
-  {
-   "id": "cmvgmu91a0009q5vbd27xedzu",
-   "sport": "football",
-   "league": "Лига чемпионов",
-   "homeTeam": "Сабах",
-   "awayTeam": "Боруссия Д",
-   "matchDate": "2026-10-20T16:45:00.000Z",
-   "market": "Исход матча (1X2)",
-   "selection": "П2 — победа гостей",
-   "odds": 1.4,
-   "stake": 8,
-   "confidence": 85,
-   "analysis": "Боруссия Дортмунд — классный еврокубковый клуб, а Сабах — дебютант, который вряд ли сможет противостоять мощи и опыту немецкого гранда.",
-   "status": "won",
-   "resultNote": "Реальный счёт 1:2 — прогноз сыграл",
-   "isRealMatch": true,
-   "isBetOfDay": false,
-   "starLogic": null,
-   "marketOdds": null,
-   "marketSource": null,
-   "marketNote": null,
-   "marketCheckedAt": null,
-   "tipsterName": "Алексей Соколов",
-   "createdAt": "2026-10-20T12:01:24.287Z",
-<<<<<<< HEAD
-   "updatedAt": "2026-10-25T13:10:35.978Z"
-=======
-   "updatedAt": "2026-10-24T06:37:17.009Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
   },
   {
    "id": "cmvgmu9180007q5vbuvetpbup",
@@ -1020,27 +832,23 @@
    "marketCheckedAt": null,
    "tipsterName": "Алексей Соколов",
    "createdAt": "2026-10-20T12:01:24.284Z",
-<<<<<<< HEAD
    "updatedAt": "2026-10-25T13:10:35.977Z"
-=======
-   "updatedAt": "2026-10-24T06:37:18.972Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
   },
   {
-   "id": "cmvgmuh88000lq5vbs1c5kjld",
-   "sport": "basketball",
-   "league": "Лига чемпионов ФИБА",
-   "homeTeam": "Фалько",
-   "awayTeam": "Вилпас",
-   "matchDate": "2026-10-20T16:00:00.000Z",
-   "market": "Исход матча",
-   "selection": "П1 — победа хозяев",
-   "odds": 1.9,
-   "stake": 6,
-   "confidence": 68,
-   "analysis": "Фалько — команда, которая дома создает серьезные проблемы для соперников. Вилпас — нестабилен, и на выезде он вряд ли сможет взять очки у уверенно играющего хозяев.",
-   "status": "void",
-   "resultNote": "Восстановлено из вечного архива: сервер платформы перезагрузился до расчёта матча, итог не сохранился — возврат (на статистику не влияет)",
+   "id": "cmvgmu91a0009q5vbd27xedzu",
+   "sport": "football",
+   "league": "Лига чемпионов",
+   "homeTeam": "Сабах",
+   "awayTeam": "Боруссия Д",
+   "matchDate": "2026-10-20T16:45:00.000Z",
+   "market": "Исход матча (1X2)",
+   "selection": "П2 — победа гостей",
+   "odds": 1.4,
+   "stake": 8,
+   "confidence": 85,
+   "analysis": "Боруссия Дортмунд — классный еврокубковый клуб, а Сабах — дебютант, который вряд ли сможет противостоять мощи и опыту немецкого гранда.",
+   "status": "won",
+   "resultNote": "Реальный счёт 1:2 — прогноз сыграл",
    "isRealMatch": true,
    "isBetOfDay": false,
    "starLogic": null,
@@ -1048,13 +856,9 @@
    "marketSource": null,
    "marketNote": null,
    "marketCheckedAt": null,
-   "tipsterName": "Дмитрий Орлов",
-   "createdAt": "2026-10-20T12:01:34.905Z",
-<<<<<<< HEAD
-   "updatedAt": "2026-10-25T13:10:35.981Z"
-=======
-   "updatedAt": "2026-10-24T06:22:52.087Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
+   "tipsterName": "Алексей Соколов",
+   "createdAt": "2026-10-20T12:01:24.287Z",
+   "updatedAt": "2026-10-25T13:10:35.978Z"
   },
   {
    "id": "cmvgmu9140005q5vb6iplvlgy",
@@ -1080,11 +884,33 @@
    "marketCheckedAt": null,
    "tipsterName": "Дмитрий Орлов",
    "createdAt": "2026-10-20T12:01:24.281Z",
-<<<<<<< HEAD
    "updatedAt": "2026-10-25T13:10:35.979Z"
-=======
-   "updatedAt": "2026-10-24T06:37:17.007Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
+  },
+  {
+   "id": "cmvgmuh88000lq5vbs1c5kjld",
+   "sport": "basketball",
+   "league": "Лига чемпионов ФИБА",
+   "homeTeam": "Фалько",
+   "awayTeam": "Вилпас",
+   "matchDate": "2026-10-20T16:00:00.000Z",
+   "market": "Исход матча",
+   "selection": "П1 — победа хозяев",
+   "odds": 1.9,
+   "stake": 6,
+   "confidence": 68,
+   "analysis": "Фалько — команда, которая дома создает серьезные проблемы для соперников. Вилпас — нестабилен, и на выезде он вряд ли сможет взять очки у уверенно играющего хозяев.",
+   "status": "void",
+   "resultNote": "Восстановлено из вечного архива: сервер платформы перезагрузился до расчёта матча, итог не сохранился — возврат (на статистику не влияет)",
+   "isRealMatch": true,
+   "isBetOfDay": false,
+   "starLogic": null,
+   "marketOdds": null,
+   "marketSource": null,
+   "marketNote": null,
+   "marketCheckedAt": null,
+   "tipsterName": "Дмитрий Орлов",
+   "createdAt": "2026-10-20T12:01:34.905Z",
+   "updatedAt": "2026-10-25T13:10:35.981Z"
   },
   {
    "id": "cmvgmu91l000jq5vb2vkdunpe",
@@ -1110,11 +936,7 @@
    "marketCheckedAt": null,
    "tipsterName": "Мария Волкова",
    "createdAt": "2026-10-20T12:01:24.297Z",
-<<<<<<< HEAD
    "updatedAt": "2026-10-25T13:10:35.982Z"
-=======
-   "updatedAt": "2026-10-24T06:39:54.822Z"
->>>>>>> 067fe3a9bc218336a846182fc1cc2d6fed53542e
   }
  ]
 }
