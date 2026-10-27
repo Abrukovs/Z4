@@ -1168,12 +1168,18 @@ const WEB_SETTLE_BUDGET = 3
 const webSettleLastAttempt = new Map<string, number>()
 
 /** «Люка Кастелнуово (Швейцария)» → стем «кастелн» — сопоставим с «Кастельнуово Л»,
- *  переживает русские склонения («Ивашко» → «Ивашка») */
+ *  переживает русские склонения («Ивашко» → «Ивашка») и вариации е/э/ё
+ *  («Тэйлор Фритц» находится на страницах, где его пишут «Тейлор») */
 function nameStem(fullName: string): string {
   const clean = fullName.replace(/\([^)]*\)/g, ' ').trim()
   const words = clean.split(/\s+/).filter((w) => w.length >= 5)
   const longest = words.sort((a, b) => b.length - a.length)[0] ?? clean.split(/\s+/)[0] ?? ''
-  return longest.toLowerCase().slice(0, 6)
+  return normalizeRu(longest.toLowerCase()).slice(0, 6)
+}
+
+/** Единые «поисковые» буквы: э и ѐ — это е (Тэйлор/Тейлор, Пётр/Петр) */
+function normalizeRu(s: string): string {
+  return s.replace(/[ёэ]/g, 'е')
 }
 
 interface WebScoreHit {
@@ -1200,6 +1206,101 @@ function cleanNameForSearch(fullName: string): string {
     .replace(/\([^)]*\)/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
+}
+
+/** Набор стемов имени (слова ≥ 4 букв, нормализованные, первые 5 символов):
+ *  «Ман. Юнайтед» → {юнайте}, «Манчестер Юнайтед» → {манче, юнайте} —
+ *  пересекаются, хотя точные строки разные */
+function nameStemSet(fullName: string): Set<string> {
+  const clean = fullName.replace(/\([^)]*\)/g, ' ')
+  const set = new Set<string>()
+  for (const w of clean.split(/[\s.·-]+/)) {
+    const n = normalizeRu(w.toLowerCase())
+    if (n.length >= 4) set.add(n.slice(0, 5))
+  }
+  return set
+}
+
+/** Один и тот же матч в расписании? Инцидент 27.10: источник ПЕРЕИМЕНОВЫВАЕТ
+ *  команды между живой страницей и архивом («Ман. Юнайтед» → «Манчестер
+ *  Юнайтед») — точное сравнение фейлилось, матч «не находился», прогноз
+ *  честно-ложно уходил в возврат. Теперь: точное совпадение ИЛИ пересечение
+ *  стем-наборов ОБЕИХ команд (гости страхуют от «Ди Си Юнайтед»). */
+function sameMatch(
+  a: { home: string; away: string },
+  b: { home: string; away: string },
+): boolean {
+  if (a.home === b.home && a.away === b.away) return true
+  const ah = nameStemSet(a.home)
+  const bh = nameStemSet(b.home)
+  const homeHit = [...ah].some((s) => bh.has(s))
+  if (!homeHit) return false
+  const aa = nameStemSet(a.away)
+  const ba = nameStemSet(b.away)
+  return [...aa].some((s) => ba.has(s))
+}
+
+/** Поиск матча в списке расписания: сперва точное имя, затем нечёткое —
+ *  и только если кандидат ЕДИНСТВЕННЫЙ (два «Спартак/Спартак-2» в один
+ *  день — неоднозначно, безопаснее пропустить). */
+function findMatchIn<
+  T extends { home: string; away: string },
+>(list: T[], home: string, away: string): T | null {
+  const exact = list.find((x) => x.home === home && x.away === away)
+  if (exact) return exact
+  const fuzzy = list.filter((x) => sameMatch({ home, away }, x))
+  return fuzzy.length === 1 ? fuzzy[0] : null
+}
+
+/** Полная дата (день.месяц.год / «Oct 25, 2026» / «27 октября 2019» / ISO) с ГОДОМ,
+ *  отличным от года нашего матча: страница рассказывает о чужом (обычно
+ *  старом) матче — её счёт нам не подходит. Инцидент 27.10: сниппет sports.ru
+ *  о товарняке «МЮ – Борнмут 4:1» июля 2025-го едва не прошёл за итог матча
+ *  25.10.2026; сниппет спорт-экспресс о «Штраубинг — Аугсбург 7:3» от 2019-го —
+ *  та же ловушка. */
+function hasForeignFullDate(raw: string, matchYear: number): boolean {
+  const dateRes = [
+    /\d{1,2}\.\d{1,2}\.\d{4}/g, // 25.10.2026 / 15.12.2025
+    /\d{1,2}\/\d{1,2}\/\d{4}/g, // 29/11/2024
+    /\d{4}-\d{2}-\d{2}/g, // 2026-10-25 (ISO)
+    /\d{4}\/\d{2}\/\d{2}/g, // 2026/10/25
+    /(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+\d{1,2},\s*\d{4}/gi, // Jul 30, 2025
+    /\d{1,2}\s+(?:январ|феврал|март|апрел|ма[йя]|июн|июл|август|сентябр|октябр|ноябр|декабр)\w*\s+\d{4}/gi, // 27 октября 2019
+  ]
+  for (const re of dateRes) {
+    for (const m of raw.matchAll(re)) {
+      const y = m[0].match(/\d{4}/)
+      if (y && Number(y[0]) !== matchYear) return true
+    }
+  }
+  return false
+}
+
+/** Правдоподобный счёт для вида спорта: футбол ≤ 15, хоккей ≤ 20,
+ *  баскетбол — обе команды 40–200 очков (фильтрует время «16:45»,
+ *  даты «25.10» и мусорные обрывки) */
+function plausibleScore(sport: string, a: number, b: number): boolean {
+  if (sport === 'football') return a <= 15 && b <= 15
+  if (sport === 'hockey') return a <= 20 && b <= 20
+  if (sport === 'basketball') return a >= 40 && a <= 200 && b >= 40 && b <= 200
+  return a <= 200 && b <= 200
+}
+
+/** Похоже на время начала, а не на счёт: «в 11:00», «17:00 МСК», «20:10 UTC».
+ *  Реальные счёты 12:0+ в футболе/хоккее практически не встречаются. */
+function looksLikeTime(
+  raw: string,
+  idx: number,
+  len: number,
+  a: number,
+  b: number,
+): boolean {
+  if (b !== 0 || a < 9 || a > 23) return false
+  const before = raw.slice(Math.max(0, idx - 3), idx).toLowerCase()
+  const after = raw.slice(idx + len, idx + len + 6).toLowerCase()
+  if (/в\s*$/.test(before)) return true // «начало в 11:00»
+  if (/^\s*(мск|msk|utc|cet|cest)/.test(after)) return true // «20:10 UTC»
+  return a >= 12 // голое «17:00» рядом с командами — почти наверняка время
 }
 
 /** Поиск счёта матча через web_search: заголовки и сниппеты результатов.
@@ -1239,7 +1340,8 @@ async function searchScoreViaWeb(bet: {
     const matchYear = bet.matchDate.getUTCFullYear()
 
     for (const r of results) {
-      const text = `${r.name} ${r.snippet ?? ''}`.toLowerCase()
+      // Стемы с нормализацией е/э/ё — «Тэйлор» в расписании = «Тейлор» в выдаче
+      const text = normalizeRu(`${r.name} ${r.snippet ?? ''}`.toLowerCase())
       if (!text.includes(homeStem) || !text.includes(awayStem)) continue
       const raw = `${r.name} ${r.snippet ?? ''}`
 
@@ -1253,6 +1355,10 @@ async function searchScoreViaWeb(bet: {
       ) {
         continue
       }
+
+      // Страница датирует материал полной датой с ЧУЖИМ годом — она
+      // рассказывает о старом матче этих же соперников, счёт не наш
+      if (hasForeignFullDate(raw, matchYear)) continue
 
       // 1) Теннис: полная последовательность сетов «4-6 6-2 6-1»
       if (isTennis) {
@@ -1280,11 +1386,29 @@ async function searchScoreViaWeb(bet: {
           if (!isTennisTotal && a <= 2 && b <= 2 && a + b >= 1) {
             return { score: `${a}:${b}`, source: r.host_name }
           }
-        } else if (a <= 200 && b <= 200 && (bet.sport !== 'basketball' || (a >= 40 && b >= 40))) {
-          // Баскетбол: обе команды в итоговом счёте набирают 40+ очков.
-          // Обрывки вроде «17:0» (спурт одной команды) — не итог, отклоняем
-          // (инцидент 24.10: «Галатасарай — Страсбур 17:0» из сниппета sofascore)
+        } else if (
+          plausibleScore(bet.sport, a, b) &&
+          !looksLikeTime(raw, m.index ?? 0, m[0].length, a, b)
+        ) {
+          // Санити по виду спорта + фильтр «времени начала» (16:45, 17:00 МСК).
+          // Баскетбол: обе команды 40+ очков — обрывки вроде «17:0» (спурт)
+          // не итог (инцидент 24.10: «Галатасарай — Страсбур 17:0» из sofascore)
           return { score: `${a}:${b}`, source: r.host_name }
+        }
+      }
+
+      // 3) Счёт через дефис «2-4» / «58 - 52» — формат flashscore/aiscore
+      //    (для тенниса дефис — это уже разобранные выше сеты)
+      if (!isTennis) {
+        const d = raw.match(/(^|[^\d:])(\d{1,2})\s*[-–]\s*(\d{1,3})(?=[^\d:]|$)/)
+        if (d && !contextHasForeignYear(raw, d.index + d[1].length, matchYear)) {
+          const a = Number(d[2])
+          const b = Number(d[3])
+          // Санити тот же: отсекает фрагменты дат «10-25», «25-10» и счёты
+          // не-итогового формата (кроме баскетбола, где обе команды 40+)
+          if (plausibleScore(bet.sport, a, b)) {
+            return { score: `${a}:${b}`, source: r.host_name }
+          }
         }
       }
     }
@@ -1318,7 +1442,7 @@ export async function resolveRealBets(): Promise<void> {
     }
 
     const list = data.sports[bet.sport as SportKey] ?? []
-    const m = list.find((x) => x.home === bet.homeTeam && x.away === bet.awayTeam)
+    const m = findMatchIn(list, bet.homeTeam, bet.awayTeam)
     const ageMs = Date.now() - bet.matchDate.getTime()
 
     if (!m) {
@@ -1428,19 +1552,36 @@ export async function resolveRealBets(): Promise<void> {
   if (updated > 0) await recomputeTipsterCounters()
 }
 
-/* ------- Ретро-расчёт восстановленных возвратов (просьба 24.10) -------- */
+/* ------- Ретро-расчёт возвратов (просьбы 24.10 и 27.10) -------- */
 
-/** Пометка «восстановлено из архива» — ретро-расчёт трогает ТОЛЬКО такие возвраты */
+/** Пометка «восстановлено из архива» — ретро-расчёт трогает такие возвраты */
 const RESTORED_NOTE_PREFIX = 'Восстановлено из вечного архива'
+/** «Мягкие» возвраты — итог на момент расчёта НЕ НАШЁЛСЯ (расписание не
+ *  покрыло матч, поисковик ещё не проиндексировал, матч отложили). Это
+ *  не окончательное решение — ретро-расчёт возвращается к ним и
+ *  пересчитывает, когда счёт появляется. Жалоба 27.10: «у экспертов есть
+ *  проигравшие прогнозы, которые оцениваются как возврат» — именно эти
+ *  случаи. Настоящие возвраты («Матч отменён») неприкосновенны. */
+const SOFT_VOID_PREFIXES = [
+  'Матч не найден ни в расписании, ни в веб-поиске',
+  'Итог матча недоступен',
+  'Матч не стартовал',
+] as const
+/** Окно повторного веб-поиска итога: поисковик живёт ~10 дней назад */
+const SOFT_VOID_WEB_WINDOW_MS = 7 * 24 * 60 * 60 * 1000
+/** Перерыв между веб-поисками по одному и тому же возврату (авто-режим) */
+const RETRO_WEB_RETRY_MS = 45 * 60 * 1000
 /** Бюджет веб-поиска за один запуск ретро-расчёта (вежливость к поисковику) */
 const RETRO_WEB_BUDGET = 12
 /** Троттл повторных запусков (кнопка + авто) — не чаще раза в 5 минут */
 const RETRO_THROTTLE_MS = 5 * 60_000
 
 const globalForRetro = globalThis as unknown as { __retroSettleLastRun?: number }
+/** Когда последний раз искали счёт по конкретной ставке (авто-режим) */
+const retroWebLastAttempt = new Map<string, number>()
 
 export interface RetroSettleResult {
-  /** Возвратов-кандидатов нашлось (восстановленных из архива) */
+  /** Возвратов-кандидатов нашлось (архивных + «мягких» без итога) */
   processed: number
   /** Рассчитаны по реальным счётам: зашло / мимо */
   settled: number
@@ -1451,14 +1592,20 @@ export interface RetroSettleResult {
 }
 
 /**
- * «Рассчитайте уцелевшие прогнозы» (владелец, 24.10). Ночные сбросы платформы
- * обрывали авто-расчёт, и восстановленные из вечного архива прогнозы честно
- * помечались возвратами. Но матчи давно сыграли — пробуем рассчитать их
- * ПО РЕАЛЬНЫМ СЧЁТАМ: сначала страница расписания за ту дату источника,
- * затем запасной веб-поиск (как в resolveRealBets). Трогаем только возвраты
- * с пометкой архива — обычные возвраты (отмена матча и т.п.) неприкосновенны.
- * Идемпотентно: рассчитанный прогноз получает настоящий статус и больше
- * не попадает в выборку.
+ * «Рассчитайте уцелевшие прогнозы» (владелец, 24.10) + «проигравшие числятся
+ * возвратами» (владелец, 27.10). Пересчитывает по РЕАЛЬНЫМ счётам возвраты
+ * двух родов:
+ *  1) восстановленные из вечного архива (ночной сброс оборвал расчёт);
+ *  2) «мягкие» — итог на момент расчёта не нашёлся (расписание не покрыло
+ *     матч / поиск ещё не проиндексировал / матч отложили).
+ * Путь к счёту: страница расписания за ту дату → запасной веб-поиск
+ * (окно ~7 дней — дальше поисковик уже не отдаёт).
+ * Настоящие возвраты («Матч отменён») не трогаем. Идемпотентно:
+ * рассчитанный прогноз получает настоящий статус и выпадает из выборки.
+ *
+ * force=true — кнопка «Рассчитать возвраты»: все кандидаты, без троттлов.
+ * force=false — авто-тик: только свежие (≤ 7 дней) + троттл веб-поиска
+ * по каждой ставке — чтобы не долбить поисковик одними и теми же.
  */
 export async function retroSettleRestoredVoids(force = false): Promise<RetroSettleResult> {
   const lastRun = globalForRetro.__retroSettleLastRun ?? 0
@@ -1473,17 +1620,27 @@ export async function retroSettleRestoredVoids(force = false): Promise<RetroSett
   globalForRetro.__retroSettleLastRun = Date.now()
 
   const voids = await db.bet.findMany({
-    where: { status: 'void', resultNote: { startsWith: RESTORED_NOTE_PREFIX } },
-    orderBy: { matchDate: 'asc' },
+    where: {
+      status: 'void',
+      OR: [
+        { resultNote: { startsWith: RESTORED_NOTE_PREFIX } },
+        ...SOFT_VOID_PREFIXES.map((p) => ({ resultNote: { startsWith: p } })),
+      ],
+      // авто-режим экономит запросы: старые возвраты — только кнопкой
+      ...(force ? {} : { matchDate: { gte: new Date(Date.now() - SOFT_VOID_WEB_WINDOW_MS) } }),
+    },
+    // свежие сверху: у них самый высокий шанс найти счёт в поиске
+    orderBy: { matchDate: 'desc' },
   })
   const res: RetroSettleResult = { processed: voids.length, settled: 0, stayed: 0, lines: [] }
   if (voids.length === 0) {
-    res.lines.push('Возвратов из архива не найдено — рассчитывать нечего.')
+    res.lines.push('Подходящих возвратов не найдено — рассчитывать нечего.')
     return res
   }
 
   const dateCache = new Map<string, RealMatchesData | null>()
   let webBudget = RETRO_WEB_BUDGET
+  const webWindowStart = Date.now() - SOFT_VOID_WEB_WINDOW_MS
 
   for (const bet of voids) {
     const dateStr = mskDateOf(bet.matchDate.getTime())
@@ -1495,20 +1652,28 @@ export async function retroSettleRestoredVoids(force = false): Promise<RetroSett
     }
     const data = dateCache.get(dateStr) ?? null
     const list = data?.sports[bet.sport as SportKey] ?? []
-    const m = list.find((x) => x.home === bet.homeTeam && x.away === bet.awayTeam)
+    const m = findMatchIn(list, bet.homeTeam, bet.awayTeam)
 
     let verdict: { status: 'won' | 'lost'; note: string } | null = null
     let srcNote = ''
     if (m?.status === 'finished' && m.score) {
       // Расписание источника хранит архив дат: считаем по его счёту
       verdict = evaluateRealBet(bet, m.score)
-    } else if (webBudget > 0) {
-      // Матча нет на странице той даты — запасной веб-поиск счёта
-      webBudget--
-      const hit = await searchScoreViaWeb(bet)
-      if (hit) {
-        verdict = evaluateRealBet(bet, hit.score)
-        srcNote = ` · счёт по данным веб-поиска (${hit.source})`
+    } else {
+      // Матча нет на странице той даты — запасной веб-поиск счёта.
+      // Только в пределах окна ~7 дней: глубже поисковик не отдаёт,
+      // и не чаще раза в 45 минут по одной ставке в авто-режиме.
+      const fresh = bet.matchDate.getTime() >= webWindowStart
+      const retryOk =
+        force || Date.now() - (retroWebLastAttempt.get(bet.id) ?? 0) > RETRO_WEB_RETRY_MS
+      if (webBudget > 0 && fresh && retryOk) {
+        retroWebLastAttempt.set(bet.id, Date.now())
+        webBudget--
+        const hit = await searchScoreViaWeb(bet)
+        if (hit) {
+          verdict = evaluateRealBet(bet, hit.score)
+          srcNote = ` · счёт по данным веб-поиска (${hit.source})`
+        }
       }
     }
 
@@ -1533,7 +1698,7 @@ export async function retroSettleRestoredVoids(force = false): Promise<RetroSett
     await syncBetArchive(true) // вечный архив запоминает настоящие итоги
     logInfoBg(
       'real-bets',
-      `Ретро-расчёт возвратов: ${res.settled} из ${res.processed} восстановленных прогнозов рассчитаны по реальным счётам`,
+      `Ретро-расчёт возвратов: ${res.settled} из ${res.processed} прогнозов рассчитаны по реальным счётам`,
       { settled: res.settled, stayed: res.stayed },
     )
   }
@@ -1679,6 +1844,13 @@ export function ensureRealBets(): void {
       console.error('[real-bets] resolve error:', e)
       logErrorBg('real-bets', 'Авто-расчёт прогнозов по реальным счётам не удался', e)
     })
+  // «Мягкие» возвраты пересчитываются сами: итог мог просто не найтись
+  // в момент расчёта (поисковик индексирует с задержкой, матч отложили) —
+  // теперь счёт доищется и статус станет честным «зашло/мимо»
+  // (жалоба 27.10: «проигравшие прогнозы оцениваются как возврат»)
+  void retroSettleRestoredVoids(false).catch((e) => {
+    console.error('[real-bets] retro-settle error:', e)
+  })
   void maybeGenerate().catch((e) => {
     console.error('[real-bets] ensure error:', e)
     logErrorBg('real-bets', 'Фоновое обслуживание прогнозов не удалось', e)

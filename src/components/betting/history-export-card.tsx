@@ -211,7 +211,7 @@ export function HistoryExportCard() {
             <div className="mt-3 rounded-xl border border-emerald-200/70 bg-emerald-500/[0.05] p-3.5">
               <p className="text-sm font-semibold text-zinc-800">
                 {settleResult.processed === 0
-                  ? 'Возвратов из архива не найдено — рассчитывать нечего ✅'
+                  ? 'Подходящих возвратов не найдено — рассчитывать нечего ✅'
                   : `Рассчитано по реальным счётам: ${settleResult.settled} из ${settleResult.processed}${settleResult.stayed > 0 ? ` · остались возвратами: ${settleResult.stayed}` : ''}`}
               </p>
               {settleResult.lines.length > 0 && (
@@ -228,10 +228,12 @@ export function HistoryExportCard() {
           )}
 
           <p className="mt-3 text-[11px] text-zinc-500">
-            «Рассчитать возвраты» — если сбой оборвал расчёт матча и прогноз
+            «Рассчитать возвраты» — если итог матча не нашёлся сразу (сбой
+            сервера, отложенный матч, поиск ещё не проиндексировал) и прогноз
             помечался «возврат», кнопка найдёт реальный счёт и поставит честное
-            «зашло» или «мимо». Файл CSV открывается в Excel: дата, эксперт,
-            матч, коэффициент, итог.
+            «зашло» или «мимо». Система делает это и автоматически — раз в
+            час-два. Файл CSV открывается в Excel: дата, эксперт, матч,
+            коэффициент, итог.
           </p>
         </CardContent>
       </Card>
